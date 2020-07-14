@@ -10,11 +10,12 @@
 #include <G4VPrimaryGenerator.hh>
 
 P4PrimaryGeneratorAction::P4PrimaryGeneratorAction()
-    : sim4py::ParameterGene<G4VUserPrimaryGeneratorAction>()     
+    : sim4py::ParameterGene("P4PrimaryGeneratorAction"),
+      G4VUserPrimaryGeneratorAction()   
 {
     primary_generator = nullptr;
     
-    SetParameter<std::string>("class_name", "P4PrimaryGeneratorAction");
+    // SetParameter<std::string>("class_name", "P4PrimaryGeneratorAction");
 
     is_applied_parameters = false;
     

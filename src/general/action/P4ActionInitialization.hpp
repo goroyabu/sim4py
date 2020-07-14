@@ -16,7 +16,7 @@
 #include <G4UserSteppingAction.hh>
 
 class P4ActionInitialization
-    : public sim4py::ParameterGene<G4VUserActionInitialization>
+    : public sim4py::ParameterGene, public G4VUserActionInitialization
 {
     
 public:

@@ -19,13 +19,16 @@ using std::endl;
 #include <P4RootAnalysisManager.hpp>
 
 W4EventAction::W4EventAction()
-    : sim4py::ParameterGene<G4UserEventAction>()
+    : sim4py::ParameterGene("W4EventAction"), G4UserEventAction()
 {
-    SetParameter<std::string>("class_name", "W4EventAction");
+    // SetParameter<std::string>("class_name", "W4EventAction");
     
     save_nhit_min = 1;
     DefineParameter<int>("minimum_nhits_to_save", save_nhit_min);
 
+    print_frequency = 1000;
+    DefineParameter<int>("print_frequency", print_frequency);
+    
     is_applied_parameters = false;
 }
 
@@ -37,6 +40,9 @@ void W4EventAction::BeginOfEventAction(const G4Event* event)
 {
     if ( is_applied_parameters==false ) {
 	save_nhit_min = std::get<0>( GetParameter<int>("minimum_nhits_to_save") );
+	print_frequency
+	    = std::get<0>( GetParameter<int>("print_frequency") );
+	is_applied_parameters = true;
     }
     
     auto analysis_manager = P4RootAnalysisManager::Instance();
@@ -45,7 +51,7 @@ void W4EventAction::BeginOfEventAction(const G4Event* event)
     G4int eventID = event->GetEventID();
     analysis_manager->FillNtupleIColumnName( "eventID", eventID );
     
-    if ( eventID%10000==0 ) {
+    if ( eventID%print_frequency==0 ) {
 	auto ima = std::chrono::system_clock::now();
 	auto ima_time = std::chrono::system_clock::to_time_t(ima);
 	cout << ">> Event " << std::setw(10) << eventID << " at " << std::ctime(&ima_time);

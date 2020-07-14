@@ -9,8 +9,11 @@
 
 #include <G4RunManager.hh>
 
+class G4UIExecutive;
+class G4VisExecutive;
+
 class P4RunManager
-    : public sim4py::ParameterGene<G4RunManager>
+    : public sim4py::ParameterGene, public G4RunManager
 {
     
 public:
@@ -28,14 +31,28 @@ public:
     virtual void SetUserInitialization
     (G4VUserActionInitialization *userInit) override;
 
-    virtual void SetReferencePhysicsList(const std::string& name="FTFP_BERT");
+    virtual void UseReferencePhysicsList(const std::string& name="FTFP_BERT");
+    virtual void UseGenericPhysicsList(const std::vector<std::string>& constructors);
     
 private:
 
+    /* parameters */
+    int verbose_level;
+    bool is_enabled_visualization;
+    
     bool is_set_detector_construction;
     bool is_set_physics_list;
     bool is_set_action_initialization;
-    int verbose_level;
+    bool is_already_setup_vis;
+
+    G4UIExecutive * ui_executive;
+    G4VisExecutive * vis_executive;
+
+    G4VUserPhysicsList          * physics_list;
+    G4VUserActionInitialization * action_initialization;
+    G4VUserDetectorConstruction * detector_construction;
+    
+    void SetupVisualization();
     
 };
 

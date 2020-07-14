@@ -33,39 +33,39 @@
 // 	.def("set_user_initialization", overload_cast_impl<G4VUserActionInitialization*>()(&G4RunManager::SetUserInitialization));
 // }
 
-class test_class
-{
-public:
-    std::string class_name;
-    double number;
-    std::string key;
+// class test_class
+// {
+// public:
+//     std::string class_name;
+//     double number;
+//     std::string key;
 
-    test_class()
-	: class_name("test_class"), number(777), key("")
-    {}
-    test_class(std::string key)
-	: class_name("test_class"), number(88.0), key(key)
-    {}
-};
+//     test_class()
+// 	: class_name("test_class"), number(777), key("")
+//     {}
+//     test_class(std::string key)
+// 	: class_name("test_class"), number(88.0), key(key)
+//     {}
+// };
 
-class test_w_params : public sim4py::ParameterGene<test_class>
-{
+// class test_w_params : public sim4py::ParameterGene<test_class>
+// {
 
-public:
-    test_w_params()
-	: sim4py::ParameterGene<test_class>(test_class())
-    {
-	DefineParameter<int>("id", 101);
-	SetParameter<int>("id", 108);
-	GetParameter<int>("id");
-    }
+// public:
+//     test_w_params()
+// 	: sim4py::ParameterGene<test_class>(test_class())
+//     {
+// 	DefineParameter<int>("id", 101);
+// 	SetParameter<int>("id", 108);
+// 	GetParameter<int>("id");
+//     }
 
-    std::string get_name() { return test_class::class_name; } 
-    double get_number() { return test_class::number; }
-    std::string get_key() { return test_class::key; }
-};
+//     std::string get_name() { return test_class::class_name; } 
+//     double get_number() { return test_class::number; }
+//     std::string get_key() { return test_class::key; }
+// };
 
-// template<class... Parents>
+// // template<class... Parents>
 // void declare_module(pybind11::module& m, const std::string pyclassname)
 // {
 //     using mod = anl::ParameterGene<Parents...>;
@@ -90,17 +90,17 @@ PYBIND11_MODULE(sim4py, m) {
     m.doc() = R"pbdoc(
     )pbdoc";
 
-    pybind11::class_<test_class>(m, "test_class");
-    auto c = pybind11::class_<test_w_params>(m, "test_w_params")
-	.def("name", &test_w_params::get_name)
-	.def("number", &test_w_params::get_number)
-	.def("key", &test_w_params::get_key);
-    // sim4py::ParameterGene<test_class>::define_common_method(c);
-    sim4py::define_common_method<test_w_params>(c);
-    //define_common_method<test_w_params>(c);
+    // pybind11::class_<test_class>(m, "test_class");
+    // auto c = pybind11::class_<test_w_params>(m, "test_w_params")
+    // 	.def("name", &test_w_params::get_name)
+    // 	.def("number", &test_w_params::get_number)
+    // 	.def("key", &test_w_params::get_key);
+    // // sim4py::ParameterGene<test_class>::define_common_method(c);
+    // sim4py::define_common_method<test_w_params>(c);
+    // //define_common_method<test_w_params>(c);
     
-    //declare_common_method(c);
-    //declare_module<test_class>(m, "test_class_p");
+    // //declare_common_method(c);
+    // //declare_module<test_class>(m, "test_class_p");
     
     clhep_py::define_clhep(m);
 

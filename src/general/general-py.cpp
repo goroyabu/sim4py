@@ -13,7 +13,9 @@
 #include <G4VUserPhysicsList.hh>
 #include <G4VUserActionInitialization.hh>
 
+#include <G4VisExecutive.hh>
 #include <G4UIExecutive.hh>
+#include <G4UImanager.hh>
 
 #include <G4PhysListFactory.hh>
 #include <G4VModularPhysicsList.hh>
@@ -23,7 +25,7 @@
 #include <G4EmPenelopePhysics.hh>
 #include <G4EmLowEPPhysics.hh>    
 
-#include "P4RunManager.hpp"
+#include <P4RunManager.hpp>
 
 #include <P4ActionInitialization.hpp>
 #include <P4GeneralParticleSource.hpp>
@@ -42,34 +44,64 @@ namespace general_py
 	
 	pybind11::module sub = main.def_submodule("general","Sub-module including general Geant4 Classes.");
 
-	pybind11::class_<G4RunManager>(sub, "G4RunManager")
-	    .def(pybind11::init<>())
-	    .def("BeamOn", &G4RunManager::BeamOn, pybind11::arg("n_event"), pybind11::arg("macroFile")='\0', pybind11::arg("n_select")=-1)
-	    .def("Initialize", &G4RunManager::Initialize)
-	    .def("SetVerboseLevel", &G4RunManager::SetVerboseLevel)
-	    .def("GetVerboseLevel", &G4RunManager::GetVerboseLevel)
-	    .def("SetUserInitialization", [](G4RunManager& self, G4VUserDetectorConstruction* detector){ self.G4RunManager::SetUserInitialization(detector);})
-	    .def("SetUserInitialization", [](G4RunManager& self, G4VUserPhysicsList* physics){ self.G4RunManager::SetUserInitialization(physics);})
-	    .def("SetUserInitialization", [](G4RunManager& self, G4VUserActionInitialization* action){ self.G4RunManager::SetUserInitialization(action);});
+	using sim4py::ParameterGene;
+        pybind11::class_<ParameterGene>(sub, "ParameterGene", pybind11::module_local());
+
+	pybind11::class_<G4RunManager>(sub, "G4RunManager");
+	    // .def(pybind11::init<>())
+	    // .def("BeamOn", &G4RunManager::BeamOn, pybind11::arg("n_event"), pybind11::arg("macroFile")='\0', pybind11::arg("n_select")=-1)
+	    // .def("Initialize", &G4RunManager::Initialize)
+	    // .def("SetVerboseLevel", &G4RunManager::SetVerboseLevel)
+	    // .def("GetVerboseLevel", &G4RunManager::GetVerboseLevel)
+	    // .def("SetUserInitialization", [](G4RunManager& self, G4VUserDetectorConstruction* detector){ self.G4RunManager::SetUserInitialization(detector);})
+	    // .def("SetUserInitialization", [](G4RunManager& self, G4VUserPhysicsList* physics){ self.G4RunManager::SetUserInitialization(physics);})
+	    // .def("SetUserInitialization", [](G4RunManager& self, G4VUserActionInitialization* action){ self.G4RunManager::SetUserInitialization(action);});
 	
 	    // .def("SetUserInitialization", overload_cast_impl<G4VUserDetectorConstruction*>()(&G4RunManager::SetUserInitialization))
 	    // .def("SetUserInitialization", overload_cast_impl<G4VUserPhysicsList*>()(&G4RunManager::SetUserInitialization))
 	    // .def("SetUserInitialization", overload_cast_impl<G4VUserActionInitialization*>()(&G4RunManager::SetUserInitialization));
 	
-	auto p4run_manager = pybind11::class_<P4RunManager, G4RunManager>(sub, "P4RunManager")
+	auto p4run_manager = pybind11::class_<P4RunManager, ParameterGene, G4RunManager>(sub, "P4RunManager")
 	    .def(pybind11::init<>())
 	    .def("BeamOn", &P4RunManager::BeamOn, pybind11::arg("n_event"), pybind11::arg("macroFile")='\0', pybind11::arg("n_select")=-1)
 	    .def("Initialize", &P4RunManager::Initialize)
 	    .def("SetVerboseLevel", &P4RunManager::SetVerboseLevel)
 	    .def("GetVerboseLevel", &P4RunManager::GetVerboseLevel)
+	    // .def("SetUserInitialization", [](P4RunManager& self, G4VUserDetectorConstruction* detector){
+	    // 				      auto det = std::move(detector);
+	    // 				      detector = 0;
+	    // 				      self.P4RunManager::SetUserInitialization(det);
+	    // 				  })
 	    .def("SetUserInitialization", [](P4RunManager& self, G4VUserDetectorConstruction* detector){ self.P4RunManager::SetUserInitialization(detector);})
 	    .def("SetUserInitialization", [](P4RunManager& self, G4VUserPhysicsList* physics){ self.P4RunManager::SetUserInitialization(physics);})
 	    .def("SetUserInitialization", [](P4RunManager& self, G4VUserActionInitialization* action){ self.P4RunManager::SetUserInitialization(action);})
-	    .def("SetReferencePhysicsList", &P4RunManager::SetReferencePhysicsList, pybind11::arg("name")="FTFP_BERT");
+	    .def("UseReferencePhysicsList", &P4RunManager::UseReferencePhysicsList, pybind11::arg("name")="FTFP_BERT")
+	    .def("UseGenericPhysicsList", &P4RunManager::UseGenericPhysicsList);
 	sim4py::define_common_method(p4run_manager);
-	
-	pybind11::class_<G4UIExecutive>(sub, "G4UIExecutive");
+	// sim4py::define_as_singleton(p4run_manager);
 
+	// pybind11::class_<G4VisExecutive>(sub, "G4VisExecutive")
+	//     .def_static("Instance", [](){
+	// 				static G4VisExecutive * instance;
+	// 				if ( !instance ) instance = new G4VisExecutive;
+	// 				return instance;
+	// 			    } )
+	//     .def("Initialize", &G4VisExecutive::Initialize);
+	
+	// pybind11::class_<G4UIExecutive>(sub, "G4UIExecutive")
+	//     .def_static("Instance", [](int argc, const std::vector<std::string>& argv){
+	// 				std::vector<char*> cstrings;
+	// 				cstrings.reserve( argv.size() );
+	// 				for ( auto itr : argv )
+	// 				    cstrings.emplace_back( const_cast<char*>( itr.c_str() ) );				     
+	// 				return new G4UIExecutive(argc, &cstrings[0]);
+	// 			    } )
+	//     .def("SessionStart", &G4UIExecutive::SessionStart);
+
+	// pybind11::class_<G4UImanager>(sub, "G4UImanager")
+	//     .def_static("GetUIpointer", &G4UImanager::GetUIpointer)
+	//     .def("ApplyCommand", [](G4UImanager& self, std::string command){ self.ApplyCommand( command.c_str() ); } );
+	
 	define_physics(sub);
 	define_action(sub);
 	define_analysis(sub);
@@ -147,8 +179,14 @@ namespace general_py
 	pybind11::class_<G4VPrimaryGenerator>
 	    (sub, "G4VPrimaryGenerator", pybind11::module_local());
 	/* */
+
+	pybind11::class_<G4ParticleGun>(sub, "G4ParticleGun", pybind11::module_local());
+	pybind11::class_<G4GeneralParticleSource>(sub, "G4GeneralParticleSource", pybind11::module_local());
 	
-	auto act_init = pybind11::class_<P4ActionInitialization,G4VUserActionInitialization>
+	using sim4py::ParameterGene;
+	// pybind11::class_<ParameterGene>(sub, "ParameterGene");
+	
+	auto act_init = pybind11::class_<P4ActionInitialization, ParameterGene, G4VUserActionInitialization>
 	    (sub, "P4ActionInitialization", pybind11::module_local())
 	    .def("RegisterUserAction", [](P4ActionInitialization& self, G4VUserPrimaryGeneratorAction*action)
 				       { self.P4ActionInitialization::RegisterUserAction(action);} )
@@ -167,20 +205,22 @@ namespace general_py
 	//sim4py::define_common_method<P4ActionInitialization,G4VUserActionInitialization>(act_init);
 	sim4py::define_common_method(act_init);
 	sim4py::define_as_singleton(act_init);
-
 	
-	auto pg_action = pybind11::class_<P4PrimaryGeneratorAction,G4VUserPrimaryGeneratorAction>(sub, "P4PrimaryGeneratorAction", pybind11::module_local())
+	auto pg_action = pybind11::class_<P4PrimaryGeneratorAction, ParameterGene, G4VUserPrimaryGeneratorAction>
+	    (sub, "P4PrimaryGeneratorAction", pybind11::module_local())
 	    .def("SetPrimaryGenerator", &P4PrimaryGeneratorAction::SetPrimaryGenerator);
 	//sim4py::define_common_method<P4PrimaryGeneratorAction,G4VUserPrimaryGeneratorAction>(pg_action);
 	sim4py::define_common_method(pg_action);
 	sim4py::define_as_singleton(pg_action);
 	
-	auto gps = pybind11::class_<P4GeneralParticleSource,G4VPrimaryGenerator>(sub, "P4GeneralParticleSource", pybind11::module_local());
+	auto gps = pybind11::class_<P4GeneralParticleSource, ParameterGene, G4GeneralParticleSource, G4VPrimaryGenerator>
+	    (sub, "P4GeneralParticleSource", pybind11::module_local());
 	sim4py::define_common_method(gps);
 	sim4py::define_as_singleton(gps);
 	//sim4py::define_common_method<P4GeneralParticleSource,G4VPrimaryGenerator>(gps);
 
-	auto gun = pybind11::class_<P4ParticleGun,G4VPrimaryGenerator>(sub, "P4ParticleGun", pybind11::module_local());
+	auto gun = pybind11::class_<P4ParticleGun, ParameterGene, G4ParticleGun, G4VPrimaryGenerator>
+	    (sub, "P4ParticleGun", pybind11::module_local());
 	sim4py::define_common_method(gun);
 	sim4py::define_as_singleton(gun);	
 	
@@ -198,8 +238,9 @@ namespace general_py
     void define_detector(pybind11::module& main)
     {
 	pybind11::module sub = main.def_submodule("detector","");
-	pybind11::class_<P4DetectorConstruction>
+	auto det = pybind11::class_<P4DetectorConstruction>
 	    (sub, "P4DetectorConstruction", pybind11::module_local());
+	sim4py::define_as_singleton(det);
     }
     
 }

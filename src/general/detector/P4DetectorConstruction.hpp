@@ -17,7 +17,7 @@
 #include <globals.hh>
 
 class P4DetectorConstruction
-    : public sim4py::ParameterGene<G4VUserDetectorConstruction>
+    : public sim4py::ParameterGene, public G4VUserDetectorConstruction
 {
 public:
     

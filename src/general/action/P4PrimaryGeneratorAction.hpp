@@ -12,7 +12,7 @@
 class G4VPrimaryGenerator;
 
 class P4PrimaryGeneratorAction
-    : public sim4py::ParameterGene<G4VUserPrimaryGeneratorAction>
+    : public sim4py::ParameterGene, public G4VUserPrimaryGeneratorAction
 {
     
 public:

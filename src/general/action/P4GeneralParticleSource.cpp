@@ -16,10 +16,10 @@ using std::endl;
 using sim4py::unit;
 
 P4GeneralParticleSource::P4GeneralParticleSource()
-    : sim4py::ParameterGene<G4GeneralParticleSource>()
+    : sim4py::ParameterGene("P4GeneralParticleSource"), G4GeneralParticleSource()
 {
     is_applied_parameters = false;    
-    SetParameter<std::string>("class_name", "P4GeneralParticleSource");
+    // SetParameter<std::string>("class_name", "P4GeneralParticleSource");
 
     verbose_level = 1;
     DefineParameter<int>("verbose_level", verbose_level);

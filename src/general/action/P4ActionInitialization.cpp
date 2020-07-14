@@ -13,7 +13,8 @@ using std::cerr;
 using std::endl;
 
 P4ActionInitialization::P4ActionInitialization()
-    : sim4py::ParameterGene<G4VUserActionInitialization>()
+    : sim4py::ParameterGene("P4ActionInitialization"),
+      G4VUserActionInitialization()
 {
     primary_generator = nullptr;
     run_action        = new G4UserRunAction();
@@ -22,7 +23,7 @@ P4ActionInitialization::P4ActionInitialization()
     tracking_action   = new G4UserTrackingAction();
     stepping_action   = new G4UserSteppingAction();
     
-    SetParameter<std::string>("class_name", "P4ActionInitialization");
+    // SetParameter<std::string>("class_name", "P4ActionInitialization");
     // FixParameter<std::string>("class_name");
     
     verbose_level = 1;

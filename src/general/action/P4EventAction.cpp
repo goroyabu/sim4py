@@ -18,7 +18,7 @@ using std::endl;
 #include <G4Event.hh>
 
 P4EventAction::P4EventAction()
-    : sim4py::ParameterGene<G4UserEventAction>()
+    : sim4py::ParameterGene("P4EventAction"), G4UserEventAction()
 {
     verbose_level = 1;
     print_frequency = 1000;

@@ -28,15 +28,15 @@ find_package(ROOT)
 # ----- Sub Module ----- #
 set(files_action general/action/P4PrimaryGeneratorAction.cpp general/action/P4ParticleGun.cpp general/action/P4GeneralParticleSource.cpp general/action/P4ActionInitialization.cpp general/action/P4EventAction.cpp general/action/P4RunAction.cpp)
 set(files_analysis general/analysis/P4RootAnalysisManager.cpp)
-set(files_wstrip wstrip/W4ActionInitialization.cpp wstrip/W4RunAction.cpp wstrip/W4EventAction.cpp wstrip/W4DetectorConstruction.cpp wstrip/W4SensitiveDetector.cpp wstrip/W4HitsCollection.cpp)
+set(files_wstrip wstrip/W4RunAction.cpp wstrip/W4EventAction.cpp wstrip/W4DetectorConstruction.cpp wstrip/W4SensitiveDetector.cpp)
 set(files_detector general/detector/P4DetectorConstruction.cpp)
-set(files_run general/P4RunManager.cpp)
+set(files_run general/run/P4RunManager.cpp)
 #target_include_directories(action_py PRIVATE ${Geant4_INCLUDE_DIR} clhep general general/action python_interface)
 
 # ----- Build Python Package ----- #
 pybind11_add_module(${PROJECT_NAME} sim4-py.cpp clhep/clhep-py.cpp general/general-py.cpp wstrip/wstrip-py.cpp ${files_action} ${files_analysis} ${files_wstrip} ${files_detector} ${files_run})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${Geant4_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS} clhep general general/action general/analysis general/detector python_interface wstrip)
+target_include_directories(${PROJECT_NAME} PRIVATE ${Geant4_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS} clhep general general/run general/action general/analysis general/detector python_interface wstrip)
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-config DESTINATION lib/${PROJECT_NAME})
 install(EXPORT ${PROJECT_NAME}-config DESTINATION lib/${PROJECT_NAME} EXPORT_LINK_INTERFACE_LIBRARIES)
 

@@ -35,7 +35,7 @@ using std::cout;
 using std::endl;
 
 P4DetectorConstruction::P4DetectorConstruction()
-    : sim4py::ParameterGene<G4VUserDetectorConstruction>()
+    : sim4py::ParameterGene("P4DetectorConstruction"), G4VUserDetectorConstruction()
 {
 }
 

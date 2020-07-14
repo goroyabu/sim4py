@@ -13,7 +13,7 @@
 // #include <globals.hh>
 
 class P4EventAction
-    : public sim4py::ParameterGene<G4UserEventAction>
+    : public sim4py::ParameterGene, public G4UserEventAction
 {
     
 public:

@@ -29,8 +29,15 @@
 using std::cout;
 using std::endl;
 
+// G4bool sim4py::ParameterGene<G4VSensitiveDetector>::G4VSensitiveDetector::ProcessHits
+// (G4Step*,G4TouchableHistory*)
+// {
+//     return true;
+// }
+
 W4SensitiveDetector::W4SensitiveDetector( G4String name )
-    : G4VSensitiveDetector(name)
+    : sim4py::ParameterGene("W4SensitiveDetector"),
+      G4VSensitiveDetector(name)
 {
     // hits_collection = nullptr;
     detector_id = 0;
@@ -45,6 +52,13 @@ W4SensitiveDetector::W4SensitiveDetector( G4String name )
     grid_xaxis = new TH1D( grid_xaxis_name, ";X", 100, -5, 5);
     grid_yaxis = new TH1D( grid_yaxis_name, ";Y", 100, -5, 5);
     grid_zaxis = new TH1D( grid_zaxis_name, ";Z",   1, -5, 5);
+
+    is_merge_same_pixel = true;
+    is_merge_adjacent_pixel = true;
+    DefineParameter<bool>("merge_same_pixel", is_merge_same_pixel);
+    DefineParameter<bool>("merge_adjacent_pixel", is_merge_adjacent_pixel);
+
+    is_applied_parameters = false;
 }
 
 W4SensitiveDetector::~W4SensitiveDetector()
@@ -55,87 +69,149 @@ W4SensitiveDetector::~W4SensitiveDetector()
 }
 
 void W4SensitiveDetector::Initialize( G4HCofThisEvent* )
-{    
-    // //this->hits_collection = new HitsCollection("detector", "collection");
-    // cout << "SD::Initialize" << endl;
-    // this->hits_collection = new W4HitsCollection( GetName(), GetName()+"_hc" );
-
-    // cout << "Make HC" << endl;
-    // auto index_of_hits_collection
-    // 	= G4SDManager::GetSDMpointer()->GetCollectionID( GetName()+"_hc" );
-    // 	//= G4SDManager::GetSDMpointer()->GetCollectionID( "collection" );
-    // cout << "Get Index" << endl;
-    // hce->AddHitsCollection( index_of_hits_collection, this->hits_collection );
-    // cout << "SD::Initialize End" << endl;
+{
+    if ( is_applied_parameters==false )
+	ApplyParameters();
+    
     hits_collection.clear();
+}
+
+std::vector<W4SensitiveDetector::W4Hit> W4SensitiveDetector::MergeHits(std::vector<W4SensitiveDetector::W4Hit> hits)
+{    
+    std::vector<W4Hit> merged_hits;
+    // cout << "total " << hits.size() << endl;
+
+    while ( hits.empty()==false ) {
+	
+	int nhits = static_cast<int>( hits.size() );
+	std::vector<W4Hit> buffer;
+	// cout << "n=" << nhits << endl;
+
+	// is_merge_same_pixel = true;
+	// is_merge_adjacent_pixel = true;
+	
+	for ( int ihit=nhits-1; ihit>=0; --ihit ) {		
+	    
+	    if ( buffer.empty()==true ) {
+		buffer.emplace_back( hits[ihit] );
+		hits.erase( hits.begin()+ihit );
+		continue;
+	    }
+	    
+	    if ( hits[ihit].ExistSamePixelAmong( buffer ) &&
+		 is_merge_same_pixel==true ) {
+		
+		buffer.emplace_back( hits[ihit] );
+		hits.erase( hits.begin()+ihit );
+		// cout << "same " << ihit << endl;
+		continue;
+		
+	    }
+
+	    if ( hits[ihit].ExistAdjacentPixelAmong( buffer ) &&
+		 is_merge_adjacent_pixel==true ) {
+
+		buffer.emplace_back( hits[ihit] );
+		hits.erase( hits.begin()+ihit );
+		// cout << "ad" << endl;
+		continue;
+
+	    }	    		
+	}
+
+	// auto merged = W4Hit::MergeThem( buffer, &W4Hit::MergeOnEdepMax );
+	auto merged = W4Hit::MergeThem( buffer, &W4Hit::MergeOnFirstHit );
+	merged_hits.emplace_back( merged );	    
+	
+    }
+
+    return merged_hits;
+
+    
+    // for ( int i=0; i<nhits; ++i ) {
+	
+    // 	if ( i == 0 ) {
+    // 	    merged_hits.emplace_back( hits_collection[0] ); 
+    // 	    continue;
+    // 	}
+	
+    // 	auto current = hits_collection[i];
+    // 	// int mode = 0;
+
+    // 	int nhits_merged = (int)merged_hits.size();
+    // 	bool merge = false;
+
+    // 	for ( int j=0; j<nhits_merged; ++j ) {
+	    
+    // 	    if ( true &&
+    // 		 merged_hits[j].IsSamePixel( current ) ) {
+		
+    // 		// std::cout << "merge same" << std::endl; 
+    // 		merged_hits[j].MergeSamePixel( current );
+    // 		merge = true;
+    // 		j = nhits_merged++;
+		
+    // 	    }
+	    
+    // 	    if ( true &&
+    // 		 merged_hits[j].IsAdjacentPixel( current ) ) {		
+
+    // 		// std::cout << "merge adga" << std::endl;
+    // 		merged_hits[j].MergeAdjacentPixel( current );
+    // 		merge = true;
+    // 		j = nhits_merged++;
+		
+    // 	    }	    		
+    // 	}
+	
+    // 	//if ( nhits_merged == (int)merged_hits.size() )
+    // 	if ( merge==false )
+    // 	    merged_hits.emplace_back( current );	
+
+    // }
+    
 }
 
 void W4SensitiveDetector::EndOfEvent( G4HCofThisEvent* )
 {
     // std::cout << "W4SensitiveDetector::EndOfEvent()" << std::endl;
+    //std::vector<DsdHit*> merged_hits;
+    //auto nhits = hits_collection->entries();
+    //auto hits  = hits_collection->GetVector();
     
     auto analysis_manager = P4RootAnalysisManager::Instance();
         
-    //std::vector<DsdHit*> merged_hits;
-    std::vector<W4Hit*> merged_hits;
-    //auto nhits = hits_collection->entries();
-    int nhits = hits_collection.size();
-    //auto hits  = hits_collection->GetVector();
-    
-    for ( int i=0; i<nhits; ++i ) {
-       	
-	if ( i == 0 ) {
-	    // merged_hits.emplace_back( (*hits)[i] );
-	    merged_hits.emplace_back( hits_collection[0] ); 
-	    continue;
-	}
-	
-	//auto current  = (*hits)[i];
-	auto current = hits_collection[i];
-	int mode = 1;
-
-	int nhits_merged = (int)merged_hits.size();
-	for ( int j=0; j<nhits_merged; ++j ) {
-	    if ( mode == 0 ) {
-		if ( merged_hits[j]->IsSamePixel( *current ) ) {
-		    merged_hits[j]->MergeSamePixel( *current );
-		    j = nhits_merged++;		    
-		}
-	    }
-	    else {
-		if ( merged_hits[j]->IsAdjacentPixel( *current ) ) {
-		    merged_hits[j]->MergeAdjacentPixel( *current );
-		    j = nhits_merged++;		    
-		}
-	    }		
-	}
-	if ( nhits_merged == (int)merged_hits.size() )
-	    merged_hits.emplace_back( current );	
-
-    }
-
-    //analysis_manager->FillNtupleIColumnName( "nhits", (int)merged_hits.size() );
-    nhits = (int)merged_hits.size();
+    //std::vector<W4Hit> merged_hits;
+    //int nhits = hits_collection.size();
+        
+    auto merged_hits = MergeHits( hits_collection );
+ 
+    auto nhits = (int)merged_hits.size();
     analysis_manager->AddNtupleIColumnName( "nhits", nhits );
     if ( nhits>0 )
 	analysis_manager->AddNtupleIColumnName( "hit_pattern", (int)pow(10, detector_id) );
 
-    // cout << nhits << " ";
     for ( auto hit : merged_hits ) {	
-	analysis_manager->FillNtupleDColumnVName( "edep", hit->Energy() );
-	analysis_manager->FillNtupleIColumnVName( "detid",    hit->DetectorID() );
-	analysis_manager->FillNtupleIColumnVName( "strip_x",  hit->StripIDX()  );
-	analysis_manager->FillNtupleIColumnVName( "strip_y",  hit->StripIDY()   );
-	analysis_manager->FillNtupleDColumnVName( "pos_x",  hit->X() );
-	analysis_manager->FillNtupleDColumnVName( "pos_y",  hit->Y() );
-	analysis_manager->FillNtupleDColumnVName( "pos_z",  hit->Z() );
-	analysis_manager->AddNtupleDColumnName( "etotal", hit->Energy() );
-	analysis_manager->AddNtupleSColumnName( "proc_name", hit->ProcessName() );
-	// cout << hit->Energy() << " ";
-	auto [ x, y ] = GetCenterOfPixel( hit->StripIDX(), hit->StripIDY() );
+	analysis_manager->FillNtupleDColumnVName( "edep", hit.Energy() );
+	analysis_manager->FillNtupleIColumnVName( "detid",    hit.DetectorID() );
+	analysis_manager->FillNtupleIColumnVName( "strip_x",  hit.StripIDX()  );
+	analysis_manager->FillNtupleIColumnVName( "strip_y",  hit.StripIDY()   );
+	analysis_manager->FillNtupleDColumnVName( "pos_x",  hit.X() );
+	analysis_manager->FillNtupleDColumnVName( "pos_y",  hit.Y() );
+	analysis_manager->FillNtupleDColumnVName( "pos_z",  hit.Z() );
+	analysis_manager->FillNtupleDColumnVName( "dir_x",  hit.DirX() );
+	analysis_manager->FillNtupleDColumnVName( "dir_y",  hit.DirY() );
+	analysis_manager->FillNtupleDColumnVName( "dir_z",  hit.DirZ() );
+	analysis_manager->AddNtupleDColumnName( "etotal", hit.Energy() );
+	analysis_manager->AddNtupleSColumnName( "proc_name", hit.ProcessName() );
+	auto [ x, y ] = GetCenterOfPixel( hit.StripIDX(), hit.StripIDY() );
 	analysis_manager->FillNtupleDColumnVName( "pixel_center_x", x );
 	analysis_manager->FillNtupleDColumnVName( "pixel_center_y", y );
+	
+	analysis_manager->FillNtupleIColumnVName( "nmerged_raw_hits", hit.Nmerged() );
+	analysis_manager->AddNtupleSColumnName( "raw_proc_name", hit.MergedProcessName() );
     }
+
     // cout << endl;
     //if ( (int)merged_hits.size()!=0 )
     //analysis_manager->FillNtupleDColumnName( "etotal", merged_hits[0]->total_energy );
@@ -143,55 +219,39 @@ void W4SensitiveDetector::EndOfEvent( G4HCofThisEvent* )
 }
 
 G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
-{
-    // std::cout << "W4SensitiveDetector::ProcessHits()" << std::endl;
-
-    // cout << "detid=" << GetDetectorID() << endl;
-    // auto analysis_manager = AnalysisManager::Instance();
-    
+{    
     G4StepPoint* pre = step->GetPreStepPoint();
     G4StepPoint* post = step->GetPostStepPoint();
 
-    // auto process = pre->GetProcessDefinedStep();
-    auto process = post->GetProcessDefinedStep();
-    G4String process_name = "";
+    auto process = post->GetProcessDefinedStep(); // korede OK 
+    //auto process = pre->GetProcessDefinedStep();
+    G4String process_name = "None";
     if ( process!=nullptr ) {
 	process_name = process->GetProcessName();
-	// if ( process_name!="msc" && process_name!="Transportation" )
-	//     cout << process_name << endl;
     }
     
     G4double edep = step->GetTotalEnergyDeposit();
     G4double length = step->GetStepLength();
 
     G4ThreeVector pos = pre->GetPosition();
+    G4ThreeVector dir = pre->GetMomentumDirection();
 
     // auto touchable = step->GetPreStepPoint()->GetTouchable();
     // auto cell_id   = touchable->GetReplicaNumber(1);
 
     if ( edep <= 0.0 || length <= 0.0 ) return true;
-
-    //auto hit = new DsdHit;
-    auto hit = new W4Hit();
+    
     auto [ strip_x , strip_y ] = GetStripID( pos );
-    hit->SetDetectorID( GetDetectorID() )
-	->SetProcessName( process_name )
-	->SetStripID( strip_x, strip_y )
-	->SetPosition( pos/CLHEP::mm )
-	->SetEnergy( edep/CLHEP::keV );
+    
+    W4Hit hit;    
+    hit.SetDetectorID( GetDetectorID() );
+    hit.SetProcessName( process_name );
+    hit.SetStripID( strip_x, strip_y );
+    hit.SetPosition( pos/CLHEP::mm );
+    hit.SetDirection( dir/CLHEP::mm );
+    hit.SetEnergy( edep/CLHEP::keV );
 
     hits_collection.emplace_back( hit ); 
-    
-    //hits_collection->insert( hit );
-    //(*hits_collection)[0]->AddTotalEnergy( edep/CLHEP::keV );
-
-    //hit->Add(edep, length);
-    // if ( ! hit ) {
-    // 	G4ExceptionDescription msg;
-    // 	msg << "Cannot access hit " << cell_id;
-    // 	G4Exception("B4cCalorimeterSD::ProcessHits()",
-    // 		    "MyCode0004", FatalException, msg);
-    // }
 
     return true;
 }
@@ -229,8 +289,8 @@ G4int W4SensitiveDetector::SetGridZaxis( G4int nbins, G4double min, G4double max
 
 std::pair<G4int, G4int> W4SensitiveDetector::GetStripID( const G4ThreeVector& pos )
 {
-    auto x = grid_xaxis->FindBin( pos.x() );
-    auto y = grid_yaxis->FindBin( pos.y() );
+    auto x = grid_xaxis->FindBin( pos.x() ) - 1;
+    auto y = grid_yaxis->FindBin( pos.y() ) - 1;
     return std::make_pair(x, y);
 }
 
@@ -264,54 +324,103 @@ void W4SensitiveDetector::DeleteObject(TObject* obj)
     if ( !!obj ) obj->Delete();
 }
 
+void W4SensitiveDetector::ApplyParameters()
+{
+    auto [ same ] = GetParameter<bool>("merge_same_pixel");
+    is_merge_same_pixel = same;
+
+    auto [ adja ] = GetParameter<bool>("merge_adjacent_pixel");
+    is_merge_adjacent_pixel = adja;
+ 
+    is_applied_parameters = true;
+}
+
 W4SensitiveDetector::W4Hit::W4Hit()    
 {
     detector_id = -1;
-    process_name = "";
+    process_name = "None";
     stripid_x = -1;
     stripid_y = -1;
     position = G4ThreeVector(0,0,0);
+    direction = G4ThreeVector(0,0,0);
     energy = 0;
+    nmerged_hits = 1;
+    merged_process_name = "None";
+}
+W4SensitiveDetector::W4Hit::W4Hit(const W4Hit& other)
+{
+    detector_id = other.detector_id;
+    process_name = other.process_name;
+    stripid_x = other.stripid_x;
+    stripid_y = other.stripid_y;
+    position = other.position;
+    direction = other.direction;
+    energy = other.energy;
+    nmerged_hits = other.nmerged_hits;
+    merged_process_name = other.merged_process_name;
 }
 
 W4SensitiveDetector::W4Hit::~W4Hit()
 {
 }
 
-W4SensitiveDetector::W4Hit* W4SensitiveDetector::W4Hit::SetDetectorID(int id)
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDetectorID(int id)
 {
     this->detector_id = id;
-    return this;
+    return *this;
 }
-W4SensitiveDetector::W4Hit* W4SensitiveDetector::W4Hit::SetStripID(int x, int y)
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetStripID(int x, int y)
 {
     this->stripid_x = x; this->stripid_y = y;
-    return this;
+    return *this;
 }
-W4SensitiveDetector::W4Hit* W4SensitiveDetector::W4Hit::SetPosition
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetPosition
 (const G4ThreeVector& p)
 {
     this->position = p;
-    return this;
+    return *this;
 }
-W4SensitiveDetector::W4Hit* W4SensitiveDetector::W4Hit::SetEnergy
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDirection
+(const G4ThreeVector& v)
+{
+    this->direction = v;
+    return *this;
+}
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetEnergy
 (double e)
 {
     this->energy = e;
-    return this;
+    return *this;
 }
-W4SensitiveDetector::W4Hit* W4SensitiveDetector::W4Hit::SetProcessName
+W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetProcessName
 (const std::string& name)
 {
     this->process_name = name;
-    return this;
+    this->merged_process_name = name;
+    return *this;
 }
 bool W4SensitiveDetector::W4Hit::IsSamePixel
 (const W4SensitiveDetector::W4Hit& other)
 {
-    return detector_id   == other.detector_id
+    // std::cout << detector_id << " " << stripid_x << " " << stripid_y << " == " << other.detector_id << " " << other.stripid_x << " " << other.stripid_y << std::endl;
+    // auto is1 = detector_id == other.detector_id;
+    // auto is2 = stripid_x == other.stripid_x;
+    // auto is3 = stripid_y == other.stripid_y;
+
+    // if ( is1 ) cout << "same detid!!!" << endl;
+    // else cout << "not same detid!!!" << endl;
+
+    // if ( is2 ) cout << "same x!!!" << endl;
+    // else cout << "not same x!!!"<< endl;
+
+    // if ( is3 ) cout << "same y!!!" << endl;
+    // else cout << "not same y!!!"<< endl;
+    
+    // return is1 && is2 && is3;
+    
+    return detector_id == other.detector_id
         && stripid_x == other.stripid_x
-        && stripid_x == other.stripid_y;
+        && stripid_y == other.stripid_y;
 }
 bool W4SensitiveDetector::W4Hit::IsAdjacentPixel
 (const W4SensitiveDetector::W4Hit& other)
@@ -324,30 +433,98 @@ bool W4SensitiveDetector::W4Hit::IsAdjacentPixel
     
     return ( dx==1 && dy==0 ) || ( dx==0 && dy==1 );
 }
-void W4SensitiveDetector::W4Hit::MergeSamePixel
-(const W4SensitiveDetector::W4Hit& other)
+// void W4SensitiveDetector::W4Hit::MergeSamePixel
+// (const W4SensitiveDetector::W4Hit& other)
+// {
+//     // if ( IsSamePixel(other)==false ) return;
+
+//     G4ThreeVector newpos(0,0,0);
+//     if ( this->energy > other.energy ) newpos = this->position;
+//     else newpos = other.position;
+
+//     SetPosition( newpos );
+//     SetEnergy( this->energy + other.energy );
+// }
+// void W4SensitiveDetector::W4Hit::MergeAdjacentPixel
+// (const W4SensitiveDetector::W4Hit& other)
+// {
+//     // if ( IsAdjacentPixel(other)==false ) return;
+    
+//     G4ThreeVector newpos(0,0,0);
+
+//     //    if ( mode==0 ) {
+//     if ( this->energy > other.energy ) newpos = this->position;
+//     else newpos = other.position;
+//     //}
+
+//     SetPosition( newpos );
+//     SetEnergy( this->energy + other.energy );
+// }
+
+W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnEdepMax
+(const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
 {
-    if ( IsSamePixel(other)==false ) return;
+    auto merged = hit1;
+    
+    if ( hit1.energy < hit2.energy ) merged.SetPosition( hit2.position );
+    else merged.SetPosition( hit1.position );
+    
+    merged.SetEnergy( hit1.energy + hit2.energy );
+    merged.SetDirection( hit2.direction );
+    merged.SetProcessName( hit1.process_name );
+    // merged.SetProcessName( hit1.process_name+"+"+hit2.process_name );
+    // cout << "merge" << endl;
 
-    G4ThreeVector newpos(0,0,0);
-    if ( this->energy > other.energy ) newpos = this->position;
-    else newpos = other.position;
-
-    SetPosition( newpos );
-    SetEnergy( this->energy + other.energy );
+    merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
+    merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;
+    
+    return merged;
 }
-void W4SensitiveDetector::W4Hit::MergeAdjacentPixel
-(const W4SensitiveDetector::W4Hit& other)
+
+W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnFirstHit
+(const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
 {
-    if ( IsAdjacentPixel(other)==false ) return;
+    auto merged = hit1;    
+    
+    merged.SetEnergy( hit1.energy + hit2.energy );
+    merged.SetDirection( hit1.direction );
+    merged.SetProcessName( hit1.process_name );
 
-    G4ThreeVector newpos(0,0,0);
+    merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
+    merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;    
+    
+    return merged;
+}
 
-    //    if ( mode==0 ) {
-    if ( this->energy > other.energy ) newpos = this->position;
-    else newpos = other.position;
-    //}
+bool W4SensitiveDetector::W4Hit::ExistSamePixelAmong
+(const std::vector<W4SensitiveDetector::W4Hit>& hits)
+{
+    for ( auto hit : hits ) 
+	if ( this->IsSamePixel( hit )==true ) return true;    
+    return false;
+}
 
-    SetPosition( newpos );
-    SetEnergy( this->energy + other.energy );
+bool W4SensitiveDetector::W4Hit::ExistAdjacentPixelAmong
+(const std::vector<W4SensitiveDetector::W4Hit>& hits)
+{
+    for ( auto hit : hits )
+	if ( this->IsAdjacentPixel( hit )==true ) return true;
+    return false;
+}
+
+W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeThem
+(const std::vector<W4SensitiveDetector::W4Hit>& hits,
+ std::function<W4SensitiveDetector::W4Hit(const W4SensitiveDetector::W4Hit&, const W4SensitiveDetector::W4Hit&)> merging_method)
+{
+    W4Hit merged;
+    
+    if ( hits.empty() ) return merged;        
+
+    int nhits = static_cast<int>( hits.size() );    
+    merged = hits[ 0 ];
+    
+    for ( int ihit=1; ihit<nhits; ++ihit )
+	merged = merging_method( hits[ihit], merged );	
+    
+    return merged;
 }

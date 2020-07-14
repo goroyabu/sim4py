@@ -9,10 +9,13 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 
-#include "W4ActionInitialization.hpp"
+// #include "W4ActionInitialization.hpp"
+
+#include "P4ActionInitialization.hpp"
 #include "W4RunAction.hpp"
 #include "W4EventAction.hpp"
 #include "W4DetectorConstruction.hpp"
+#include "W4EmStandardPhysicsSwitchingDoppler.hpp"
 
 namespace wstrip_py
 {    
@@ -26,26 +29,30 @@ namespace wstrip_py
 	pybind11::class_<G4VUserActionInitialization>(sub, "G4VUserActionInitialization");
 	pybind11::class_<G4UserRunAction>(sub, "G4UserRunAction");
 	pybind11::class_<G4UserEventAction>(sub, "G4UserEventAction");
-	pybind11::class_<G4VUserDetectorConstruction>(sub, "G4VUserDetectorConstruction");	
+	pybind11::class_<G4VUserDetectorConstruction>(sub, "G4VUserDetectorConstruction");
 
-	pybind11::class_<P4ActionInitialization,G4VUserActionInitialization>(sub, "P4ActionInitialization");
+	using sim4py::ParameterGene;
+	pybind11::class_<ParameterGene>(sub, "ParameterGene");
+
+	// pybind11::class_<P4ActionInitialization,G4VUserActionInitialization>(sub, "P4ActionInitialization");
 	
-	auto init = pybind11::class_<W4ActionInitialization,P4ActionInitialization>(sub, "W4ActionInitialization", pybind11::module_local());
-	sim4py::define_common_method(init);
-	sim4py::define_as_singleton(init);
+	// auto init = pybind11::class_<W4ActionInitialization,P4ActionInitialization>(sub, "W4ActionInitialization", pybind11::module_local());
+	// sim4py::define_common_method(init);
+	// sim4py::define_as_singleton(init);
 	
-	auto run = pybind11::class_<W4RunAction,G4UserRunAction>(sub, "W4RunAction", pybind11::module_local());
+	auto run = pybind11::class_<W4RunAction, ParameterGene, G4UserRunAction>(sub, "W4RunAction", pybind11::module_local());
 	sim4py::define_common_method(run);
 	sim4py::define_as_singleton(run);
 
-	auto event = pybind11::class_<W4EventAction,G4UserEventAction>(sub, "W4EventAction", pybind11::module_local());
+	auto event = pybind11::class_<W4EventAction, ParameterGene, G4UserEventAction>(sub, "W4EventAction", pybind11::module_local());
 	sim4py::define_common_method(event);
 	sim4py::define_as_singleton(event);
 	
-	auto d = pybind11::class_<W4DetectorConstruction, G4VUserDetectorConstruction>
+	auto d = pybind11::class_<W4DetectorConstruction, ParameterGene, G4VUserDetectorConstruction>
 	    (sub, "W4DetectorConstruction", pybind11::module_local())
 	    .def("AddDetectorLayer", &W4DetectorConstruction::AddDetectorLayer);
 	sim4py::define_common_method(d);
+	//d.def(pybind11::init<>());
 	sim4py::define_as_singleton(d);
 	
 	// .def(pybind11::init( [](){ return nullptr; }))

@@ -14,10 +14,10 @@ using std::endl;
 #include <G4Geantino.hh>
 
 P4ParticleGun::P4ParticleGun()
-    : sim4py::ParameterGene<G4ParticleGun>()
+    : sim4py::ParameterGene("P4ParticleGun"), G4ParticleGun()
 {
     is_applied_parameters = false;
-    SetParameter<std::string>("class_name", "P4ParticleGun");
+    // SetParameter<std::string>("class_name", "P4ParticleGun");
 
     verbose_level = 1;
     DefineParameter<int>("verbose_level", verbose_level);

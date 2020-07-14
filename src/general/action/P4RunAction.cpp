@@ -22,9 +22,9 @@ using std::endl;
 // #include <g4root.hh>
 
 P4RunAction::P4RunAction()
-    : sim4py::ParameterGene<G4UserRunAction>()
+    : sim4py::ParameterGene("P4RunAction"), G4UserRunAction()
 {
-    SetParameter<std::string>("class_name", "P4RunAction");
+    // SetParameter<std::string>("class_name", "P4RunAction");
 
     verbose_level = 1;
     print_frequency = 1000;

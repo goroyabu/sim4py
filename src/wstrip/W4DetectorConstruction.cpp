@@ -37,9 +37,14 @@ using std::endl;
 
 W4DetectorConstruction* W4DetectorConstruction::instance = 0;
 W4DetectorConstruction::W4DetectorConstruction()
-    : sim4py::ParameterGene<G4VUserDetectorConstruction>()
+    : sim4py::ParameterGene("W4DetectorConstruction"),
+      G4VUserDetectorConstruction()
 {
-    std::cout << "W4DetectorConstruction::W4DetectorConstruction()" << std::endl;
+    // cout << "W4DetectorConstruction::W4DetectorConstruction()" << endl;
+    // SetParameter<std::string>("class_name", "W4DetectorConstruction");
+
+    DefineParameter<bool>("merge_same_pixel", true);
+    DefineParameter<bool>("merge_adjacent_pixel", true);
     
     map_key2str["worldMate"]        = "AIR";
     map_key2val["worldSize"]        = 10*cm;
@@ -95,6 +100,9 @@ G4VPhysicalVolume* W4DetectorConstruction::Construct()
     auto size_det     = this->map_key2val["detectorSize"]*0.5;
     auto gap_det      = this->map_key2val["detectorGap"];
 
+    auto [ merge_same_pixel ] = GetParameter<bool>("merge_same_pixel");
+    auto [ merge_adjacent_pixel ] = GetParameter<bool>("merge_adjacent_pixel"); 
+    
     auto ndet = (int)vec_detthic.size();
     if ( ndet > 0 ) cout << "***** Construct Geometry *****" << endl;
     
@@ -103,7 +111,7 @@ G4VPhysicalVolume* W4DetectorConstruction::Construct()
 	auto thick_det = vec_detthic[i]*0.5;
 	auto matestr_det = vec_detmate[i];
 	auto material_det = nist_manager->FindOrBuildMaterial( matestr_det );
-
+	
 	cout << "  DETID     : " << i << std::right << std::setw(5) << endl;
 	cout << "  Material  : " << matestr_det << std::setw(10) << endl;
 	cout << "  Thickness : " << thick_det << std::setw(5) << " mm " << endl;
@@ -113,6 +121,8 @@ G4VPhysicalVolume* W4DetectorConstruction::Construct()
 	auto logical_det_itr        = new G4LogicalVolume( box_det_itr, material_det, "LogicalDetector"+idstr );
 	new G4PVPlacement( 0, G4ThreeVector( 0, 0, -i*gap_det ), logical_det_itr, "PhysicalDetector"+idstr, logical_wld, false, 0 );
 	auto sensitive_detector_itr = new W4SensitiveDetector( "mySensitiveDetector"+idstr );
+	sensitive_detector_itr->SetParameter<bool>("merge_same_pixel", merge_same_pixel);
+	sensitive_detector_itr->SetParameter<bool>("merge_adjacent_pixel", merge_adjacent_pixel);
 	sensitive_detector_itr->SetGridXaxis( 128, -size_det,  size_det  );
 	sensitive_detector_itr->SetGridYaxis( 128, -size_det,  size_det  );
 	sensitive_detector_itr->SetGridZaxis(   1,         0,  thick_det );
@@ -128,11 +138,9 @@ G4VPhysicalVolume* W4DetectorConstruction::Construct()
 W4DetectorConstruction* W4DetectorConstruction::Instance()
 {
     if ( instance==nullptr ) {
-	// cout << "なかったのでつくりました" << endl;
 	new W4DetectorConstruction();
     }
     // else {
-    // 	// cout << "ありました" << endl;
     // }
     return instance;	
 }

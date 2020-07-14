@@ -4,9 +4,9 @@ import sys
 import time
 import argparse
 
-import sim4py.general as general # 汎用的なクラスがあるサブモジュール
-import sim4py.CLHEP   as CLHEP   # 単位や乱数エンジン
-import sim4py.wstrip  as wstrip  # 両面ストリップ用のサブモジュール
+import sim4py.general as general
+import sim4py.CLHEP   as CLHEP  
+import sim4py.wstrip  as wstrip
 
 def define_detector():
 
@@ -18,18 +18,11 @@ def define_detector():
     detector_construction.AddDetectorLayer( "CdTe", 750*CLHEP.um )
     detector_construction.AddDetectorLayer( "CdTe", 750*CLHEP.um )
 
-    # detector_construction\
-    #     .SwitchFlag( "merge_same_pixel", True )\
-    #     .SwitchFlag( "merge_adjacent_pixel", True )
+    detector_construction\
+        .SwitchFlag( "merge_same_pixel", True )\
+        .SwitchFlag( "merge_adjacent_pixel", True )
         # .SetParameter( "position", 0.0, 0.0, 0.0, CLHEP.um )\
         # .SetParameter( "detector_gap", 4.0, CLHEP.mm )
-
-    merge=True
-    #merge=False
-
-    detector_construction\
-        .SwitchFlag( "merge_same_pixel", merge )\
-        .SwitchFlag( "merge_adjacent_pixel", merge )
 
     detector_construction.ShowParameters()
 
@@ -81,7 +74,7 @@ def define_action():
 
     event_action = wstrip.W4EventAction.Instance()
     event_action.SetParameter( "minimum_nhits_to_save", 2 )\
-        .SetParameter( "print_frequency", 10000 )
+        .SetParameter( "print_frequency", 100 )
     event_action.ShowParameters()
 
     action_initialization = general.action.P4ActionInitialization.Instance()
@@ -103,7 +96,7 @@ if __name__ == '__main__':
     run_manager = general.P4RunManager()
     run_manager.SetParameter( "verbose_level", 0 )\
         .SetParameter( "physlist_verbose_level", 0 )\
-        .SetParameter( "cut_value", 1.0, CLHEP.mm )\
+        .SetParameter( "cut_value", 100, CLHEP.um )\
         .SwitchFlag( "visualize", False )
 
     detector_construction = define_detector()
@@ -114,12 +107,12 @@ if __name__ == '__main__':
     #print(det2)
     run_manager.SetUserInitialization( detector_construction )
 
-    #run_manager.UseReferencePhysicsList( "FTFP_BERT_LIV" )
-    my_physics_list = ["G4EmLowEPPhysics", "G4EmExtraPhysics", "G4DecayPhysics", "G4HadronElasticPhysics",\
-    "G4HadronPhysicsFTFP_BERT", "G4StoppingPhysics", "G4IonPhysics", "G4NeutronTrackingCut"]
+    run_manager.UseReferencePhysicsList( "FTFP_BERT" )
+    # my_physics_list = ["G4EmStandardPhysics", "G4EmExtraPhysics", "G4DecayPhysics", "G4HadronElasticPhysics",\
+    # "G4HadronPhysicsFTFP_BERT", "G4StoppingPhysics", "G4IonPhysics", "G4NeutronTrackingCut"]
     #my_physics_list = ["W4EmStandardPhysicsWithDoppler", "G4EmExtraPhysics", "G4DecayPhysics", "G4HadronElasticPhysics",\
     #"G4HadronPhysicsFTFP_BERT", "G4StoppingPhysics", "G4IonPhysics", "G4NeutronTrackingCut"]
-    run_manager.UseGenericPhysicsList( my_physics_list )
+    #run_manager.UseGenericPhysicsList( my_physics_list )
 
     action_initialization = define_action()
     run_manager.SetUserInitialization( action_initialization )
@@ -127,4 +120,4 @@ if __name__ == '__main__':
     run_manager.ShowParameters()
 
     print("\nRunManager::BeamOn!!")
-    run_manager.BeamOn( 100000 )
+    run_manager.BeamOn( 10000 )

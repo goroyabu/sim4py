@@ -10,7 +10,7 @@
 #include <G4ParticleGun.hh>
 
 class P4ParticleGun
-    : public sim4py::ParameterGene<G4ParticleGun>
+    : public sim4py::ParameterGene, public G4ParticleGun
 {
 
 public:

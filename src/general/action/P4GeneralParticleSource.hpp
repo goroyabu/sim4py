@@ -9,7 +9,7 @@
 #include <ParameterGene.hpp>
 
 class P4GeneralParticleSource
-    : public sim4py::ParameterGene<G4GeneralParticleSource>
+    : public sim4py::ParameterGene, public G4GeneralParticleSource
 {
     
 public:

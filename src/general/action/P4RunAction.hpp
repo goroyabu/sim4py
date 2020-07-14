@@ -15,7 +15,7 @@
 // #include <vector>
 
 class P4RunAction
-    : public sim4py::ParameterGene<G4UserRunAction>
+    : public sim4py::ParameterGene, public G4UserRunAction
 {
 
 public:

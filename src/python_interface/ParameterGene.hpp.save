@@ -225,79 +225,44 @@ namespace sim4py
 	}
 		
     };
-    
-    template<class ClassIDtype>
-    class TParameterGene
+
+    template<class... Parents>
+    class ParameterGene : public Parents...
     {
 	
     public:
 
 	// using Parents::Parents...;
 	
-	TParameterGene(const ClassIDtype& class_name)
-	{
-	    // InitializeListOfParameters();
-	    // mUIparamsInt             = std::make_unique<UIparamsInt>();            
-	    // mUIparamsString          = std::make_unique<UIparamsString>();         
-	    // mUIparamsDouble          = std::make_unique<UIparamsDouble>();         
-	    // mUIparamsDoubleUnit      = std::make_unique<UIparamsDoubleUnit>();     
-	    // mUIparamsVector3         = std::make_unique<UIparamsVector3>();        
-	    // mUIparamsVector3Unit     = std::make_unique<UIparamsVector3Unit>();    
-	    // mUIparamsBool            = std::make_unique<UIparamsBool>();	    
-	    mUIparamsInt             = new UIparamsInt;            
-	    mUIparamsString          = new UIparamsString;         
-	    mUIparamsDouble          = new UIparamsDouble;         
-	    mUIparamsDoubleUnit      = new UIparamsDoubleUnit;     
-	    mUIparamsVector3         = new UIparamsVector3;        
-	    mUIparamsVector3Unit     = new UIparamsVector3Unit;    
-	    mUIparamsBool            = new UIparamsBool;
-	    DefineParameter<std::string>("class_name", static_cast<std::string>(class_name) );
-	}	
+	ParameterGene()
+	    : Parents()...
+	    {
+		// InitializeListOfParameters();
+		mUIparamsInt             = new UIparamsInt;            
+		mUIparamsString          = new UIparamsString;         
+		mUIparamsDouble          = new UIparamsDouble;         
+		mUIparamsDoubleUnit      = new UIparamsDoubleUnit;     
+		mUIparamsVector3         = new UIparamsVector3;        
+		mUIparamsVector3Unit     = new UIparamsVector3Unit;    
+		mUIparamsBool            = new UIparamsBool;
+		DefineParameter<std::string>("class_name", "ParameterGene");
+	    }	
 	
-	TParameterGene(const TParameterGene<ClassIDtype>& other)
-	{
-	    auto [ class_name ] = other.GetParameter<std::string>("class_name");
-	    
-	    mUIparamsInt             = new UIparamsInt( *(other.mUIparamsInt) );            
-	    mUIparamsString          = new UIparamsString( *(other.mUIparamsString) );         
-	    mUIparamsDouble          = new UIparamsDouble( *(other.mUIparamsDouble) );         
-	    mUIparamsDoubleUnit      = new UIparamsDoubleUnit( *(other.mUIparamsDoubleUnit) );     
-	    mUIparamsVector3         = new UIparamsVector3( *(other.mUIparamsVector3) );        
-	    mUIparamsVector3Unit     = new UIparamsVector3Unit( *(other.mUIparamsVector3Unit) );    
-	    mUIparamsBool            = new UIparamsBool( *(other.mUIparamsBool) );
+	ParameterGene(Parents... parents)
+	    : Parents(parents)...
+	    {
+		mUIparamsInt             = new UIparamsInt;            
+		mUIparamsString          = new UIparamsString;         
+		mUIparamsDouble          = new UIparamsDouble;         
+		mUIparamsDoubleUnit      = new UIparamsDoubleUnit;     
+		mUIparamsVector3         = new UIparamsVector3;        
+		mUIparamsVector3Unit     = new UIparamsVector3Unit;    
+		mUIparamsBool            = new UIparamsBool;
+		DefineParameter<std::string>("class_name", "ParameterGene");
+		// InitializeListOfParameters();
+	    }	
 
-	    // mUIparamsInt             = std::make_unique<UIparamsInt>( *(other.mUIparamsInt) );            
-	    // mUIparamsString          = std::make_unique<UIparamsString>( *(other.mUIparamsString) );         
-	    // mUIparamsDouble          = std::make_unique<UIparamsDouble>( *(other.mUIparamsDouble) );         
-	    // mUIparamsDoubleUnit      = std::make_unique<UIparamsDoubleUnit>( *(other.mUIparamsDoubleUnit) );     
-	    // mUIparamsVector3         = std::make_unique<UIparamsVector3>( *(other.mUIparamsVector3) );        
-	    // mUIparamsVector3Unit     = std::make_unique<UIparamsVector3Unit>( *(other.mUIparamsVector3Unit) );    
-	    // mUIparamsBool            = std::make_unique<UIparamsBool>( *(other.mUIparamsBool) );	    
-
-	    // mUIparamsInt             = std::move( other.mUIparamsInt );
-	    // mUIparamsString          = std::move( other.mUIparamsString );
-	    // mUIparamsDouble          = std::move( other.mUIparamsDouble );         
-	    // mUIparamsDoubleUnit      = std::move( other.mUIparamsDoubleUnit );     
-	    // mUIparamsVector3         = std::move( other.mUIparamsVector3 );        
-	    // mUIparamsVector3Unit     = std::move( other.mUIparamsVector3Unit );    
-	    // mUIparamsBool            = std::move( other.mUIparamsBool );	
-	    DefineParameter<std::string>("class_name", static_cast<std::string>(class_name) );
-	}
-	
-	// ParameterGene(Parents... parents)
-	//     {
-	// 	mUIparamsInt             = new UIparamsInt;            
-	// 	mUIparamsString          = new UIparamsString;         
-	// 	mUIparamsDouble          = new UIparamsDouble;         
-	// 	mUIparamsDoubleUnit      = new UIparamsDoubleUnit;     
-	// 	mUIparamsVector3         = new UIparamsVector3;        
-	// 	mUIparamsVector3Unit     = new UIparamsVector3Unit;    
-	// 	mUIparamsBool            = new UIparamsBool;
-	// 	DefineParameter<std::string>("class_name", "ParameterGene");
-	// 	// InitializeListOfParameters();
-	//     }	
-
-	virtual ~TParameterGene()
+	virtual ~ParameterGene()
 	{
 	    delete mUIparamsInt;
 	    delete mUIparamsString;
@@ -322,9 +287,8 @@ namespace sim4py
 	//     }
 	//     is_already_init = true;
 	// }
-
-	// template<typename... Ts> ParameterGene<Parents...>* DefineParameter(const std::string& key, Ts... defvalue)
-	template<typename... Ts> TParameterGene* DefineParameter(const std::string& key, Ts... defvalue)
+	
+	template<typename... Ts> ParameterGene<Parents...>* DefineParameter(const std::string& key, Ts... defvalue)
         {
 	    // if ( is_already_init==false ) InitializeListOfParameters();
 	    
@@ -348,8 +312,7 @@ namespace sim4py
             return this;
         }
 
-	// template<typename... Ts> ParameterGene<Parents...>* SetParameter(const std::string& key, Ts... value)
-        template<typename... Ts> TParameterGene* SetParameter(const std::string& key, Ts... value)
+        template<typename... Ts> ParameterGene<Parents...>* SetParameter(const std::string& key, Ts... value)
         {
 	    // if ( is_already_init==false ) InitializeListOfParameters();
 	    
@@ -469,14 +432,6 @@ namespace sim4py
 	std::vector<std::string> m_dict_of_params;
 	std::map<std::string, int> m_dict_index;
 	
-	// std::unique_ptr<UIparamsInt>            mUIparamsInt;           
-	// std::unique_ptr<UIparamsString>         mUIparamsString;        
-	// std::unique_ptr<UIparamsDouble>         mUIparamsDouble;        
-	// std::unique_ptr<UIparamsDoubleUnit>     mUIparamsDoubleUnit;    
-	// std::unique_ptr<UIparamsVector3>        mUIparamsVector3;       
-	// std::unique_ptr<UIparamsVector3Unit>    mUIparamsVector3Unit;   
-	// std::unique_ptr<UIparamsBool>           mUIparamsBool;
-
 	UIparamsInt*            mUIparamsInt;           
 	UIparamsString*         mUIparamsString;        
 	UIparamsDouble*         mUIparamsDouble;        
@@ -499,7 +454,6 @@ namespace sim4py
 	}
 
 	template<typename... Ts> VUIparametersList<Ts...>* get_params_list() const { return nullptr; }
-	//{ throw std::invalid_argument("TParameterGene::get_params_list is a function template"); }
 	template<> UIparamsInt*            get_params_list() const { return mUIparamsInt; }
 	template<> UIparamsString*         get_params_list() const { return mUIparamsString; }
 	template<> UIparamsDouble*         get_params_list() const { return mUIparamsDouble; }
@@ -509,8 +463,6 @@ namespace sim4py
 	template<> UIparamsBool*           get_params_list() const { return mUIparamsBool; }
 	
     };
-    
-    using ParameterGene = TParameterGene<std::string>;
     
 }
 

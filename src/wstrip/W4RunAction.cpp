@@ -25,10 +25,9 @@ using std::endl;
 W4RunAction* W4RunAction::W4RunActionInstance = 0;
 
 W4RunAction::W4RunAction()
-    : sim4py::ParameterGene<G4UserRunAction>()
+    : sim4py::ParameterGene("W4RunAction"), G4UserRunAction()
 {
-
-    SetParameter<std::string>("class_name", "W4RunAction");
+    // SetParameter<std::string>("class_name", "W4RunAction");
 
     std::string file_name = "sim_%Y%m%d_%H%M%S.root";
     DefineParameter<std::string>("file_name", file_name);
@@ -89,9 +88,15 @@ void W4RunAction::BeginOfRunAction(const G4Run*)
     analysis_manager->CreateNtupleDColumnV( "pos_x",   128 );
     analysis_manager->CreateNtupleDColumnV( "pos_y",   128 );
     analysis_manager->CreateNtupleDColumnV( "pos_z",   128 );
+    analysis_manager->CreateNtupleDColumnV( "dir_x", 128 );
+    analysis_manager->CreateNtupleDColumnV( "dir_y", 128 );
+    analysis_manager->CreateNtupleDColumnV( "dir_z", 128 );    
     analysis_manager->CreateNtupleDColumnV( "pixel_center_x", 128 );
     analysis_manager->CreateNtupleDColumnV( "pixel_center_y", 128 );
     analysis_manager->CreateNtupleSColumn( "proc_name" );
+    analysis_manager->CreateNtupleIColumnV( "nmerged_raw_hits", 128 );
+    analysis_manager->CreateNtupleSColumn( "raw_proc_name" );    
+    
     analysis_manager->FinishNtuple();
 
     if ( verbose_level>0 )

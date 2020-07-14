@@ -13,7 +13,7 @@
 #include <globals.hh>
 
 class W4EventAction
-    : public sim4py::ParameterGene<G4UserEventAction>
+    : public sim4py::ParameterGene, public G4UserEventAction
 {
     
 public:
@@ -30,6 +30,7 @@ private:
 
     bool is_applied_parameters;
     int save_nhit_min;
+    int print_frequency;
     
 };
 

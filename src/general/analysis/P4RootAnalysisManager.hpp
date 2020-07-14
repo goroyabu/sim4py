@@ -11,7 +11,7 @@
 #include <ParameterGene.hpp>
 
 class P4RootAnalysisManager
-    : public sim4py::ParameterGene<G4RootAnalysisManager>
+    : public sim4py::ParameterGene, public G4RootAnalysisManager
 {
     struct column_index;
     

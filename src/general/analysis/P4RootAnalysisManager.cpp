@@ -24,9 +24,9 @@ P4RootAnalysisManager * P4RootAnalysisManager::Instance()
     return P4RootAnalysisManagerInstance;
 } 
 P4RootAnalysisManager::P4RootAnalysisManager()
-    : sim4py::ParameterGene<G4RootAnalysisManager>()
+    : sim4py::ParameterGene("P4RootAnalysisManager"), G4RootAnalysisManager()
 {
-    SetParameter<std::string>("class_name","P4RootAnalysisManager");
+    // SetParameter<std::string>("class_name","P4RootAnalysisManager");
     P4RootAnalysisManagerInstance = this;
     cout << "P4RootAnalysisManager is activated." << endl;
 }

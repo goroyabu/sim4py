@@ -27,8 +27,8 @@ namespace clhep_py
 	    .def(pybind11::init<>());
 	
 	pybind11::class_<CLHEP::HepRandom>(sub, "HepRandom")
-	    .def_static("set_the_seed", &CLHEP::HepRandom::setTheSeed, pybind11::arg("seed"), pybind11::arg("lux")=3)
-	    .def_static("set_the_engine", &CLHEP::HepRandom::setTheEngine);
+	    .def_static("setTheSeed", &CLHEP::HepRandom::setTheSeed, pybind11::arg("seed"), pybind11::arg("lux")=3)
+	    .def_static("setTheEngine", &CLHEP::HepRandom::setTheEngine);
 
 	/* Unit */
 	using namespace sim4py;
