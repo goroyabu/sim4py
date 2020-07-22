@@ -6,7 +6,8 @@ cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -g 3" "`python3 -m pybind11 --includes`")
+#set(CMAKE_CXX_FLAGS "-std=c++1z -Wall -g 3" "`python3 -m pybind11 --includes`")
+set(CMAKE_CXX_FLAGS "-std=c++1z -Wall")
 
 # ----- Pybind11 ----- #
 find_package(pybind11 REQUIRED)

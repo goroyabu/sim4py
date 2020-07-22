@@ -5,7 +5,7 @@ import time
 import argparse
 
 import sim4py.general as general
-import sim4py.CLHEP   as CLHEP  
+import sim4py.CLHEP   as CLHEP
 import sim4py.wstrip  as wstrip
 
 def define_detector():
@@ -14,8 +14,8 @@ def define_detector():
     detector_construction = wstrip.W4DetectorConstruction.Instance()
     detector_construction.AddDetectorLayer( "Si", 500*CLHEP.um )
     detector_construction.AddDetectorLayer( "Si", 500*CLHEP.um )
-    detector_construction.AddDetectorLayer( "CdTe", 750*CLHEP.um )
-    detector_construction.AddDetectorLayer( "CdTe", 750*CLHEP.um )
+    detector_construction.AddDetectorLayer( "CdTe", 1750*CLHEP.um )
+    detector_construction.AddDetectorLayer( "CdTe", 1750*CLHEP.um )
     detector_construction.AddDetectorLayer( "CdTe", 750*CLHEP.um )
 
     detector_construction\
@@ -23,6 +23,11 @@ def define_detector():
         .SwitchFlag( "merge_adjacent_pixel", True )
         # .SetParameter( "position", 0.0, 0.0, 0.0, CLHEP.um )\
         # .SetParameter( "detector_gap", 4.0, CLHEP.mm )
+
+    detector_construction\
+        .SetParameter( "detector_center", 0, 0, 41.35, CLHEP.mm )\
+        .SetParameter( "detector_normal", 0, 0, -1.0 )\
+        .SetParameter( "world_size", 20, CLHEP.cm )
 
     detector_construction.ShowParameters()
 
@@ -57,9 +62,9 @@ def define_action():
 
     gun = general.action.P4ParticleGun.Instance()
     gun.SetParameter( "particle", "gamma" )\
-        .SetParameter( "energy", 500.0, CLHEP.keV )\
-        .SetParameter( "position", 0.0, 0.0, 41.35, CLHEP.mm )\
-        .SetParameter( "direction", 0.0, 0.0, -1.0 )
+        .SetParameter( "energy", 200.0, CLHEP.keV )\
+        .SetParameter( "position", 0.0, 0.0, 0.0, CLHEP.mm )\
+        .SetParameter( "direction", 0.0, 0.0, 1.0 )
 
     gun.ShowParameters()
 
@@ -120,4 +125,4 @@ if __name__ == '__main__':
     run_manager.ShowParameters()
 
     print("\nRunManager::BeamOn!!")
-    run_manager.BeamOn( 10000 )
+    run_manager.BeamOn( 100 )
