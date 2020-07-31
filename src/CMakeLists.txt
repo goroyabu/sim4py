@@ -27,9 +27,9 @@ find_package(ROOT)
 #set(SIM4_CXX_LIB_NAME sim4)
 
 # ----- Sub Module ----- #
-set(files_action general/action/P4PrimaryGeneratorAction.cpp general/action/P4ParticleGun.cpp general/action/P4GeneralParticleSource.cpp general/action/P4ActionInitialization.cpp general/action/P4EventAction.cpp general/action/P4RunAction.cpp)
+set(files_action general/action/P4PrimaryGeneratorAction.cpp general/action/P4ParticleGun.cpp general/action/P4GeneralParticleSource.cpp general/action/P4ActionInitialization.cpp general/action/P4EventAction.cpp general/action/P4RunAction.cpp general/detector/P4GeometryConstruction.cpp)
 set(files_analysis general/analysis/P4RootAnalysisManager.cpp)
-set(files_wstrip wstrip/W4RunAction.cpp wstrip/W4EventAction.cpp wstrip/W4DetectorConstruction.cpp wstrip/W4SensitiveDetector.cpp)
+set(files_wstrip wstrip/W4RunAction.cpp wstrip/W4EventAction.cpp wstrip/W4DetectorConstruction.cpp wstrip/W4SensitiveDetector.cpp wstrip/GeometryCollimatorMINE1.cpp)
 set(files_detector general/detector/P4DetectorConstruction.cpp)
 set(files_run general/run/P4RunManager.cpp)
 #target_include_directories(action_py PRIVATE ${Geant4_INCLUDE_DIR} clhep general general/action python_interface)

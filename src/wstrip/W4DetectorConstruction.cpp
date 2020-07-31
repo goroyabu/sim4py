@@ -7,6 +7,8 @@
 #include "W4DetectorConstruction.hpp"
 #include "W4SensitiveDetector.hpp"
 
+#include "GeometryCollimatorMINE1.hpp"
+
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -34,6 +36,7 @@
 
 using std::cout;
 using std::endl;
+using std::cerr;
 
 using sim4py::unit;
 
@@ -206,6 +209,20 @@ G4VPhysicalVolume* W4DetectorConstruction::Construct()
     // 	sd_manager->AddNewDetector( sensitive_detector_itr );
     // 	this->SetSensitiveDetector( logical_det_itr, sensitive_detector_itr );	
     // }    
+
+    // auto use_collimetor = true;
+    // if ( use_collimetor ) {
+    // 	auto collimator = new mineapp::GeometryCollimatorMINE1();
+    // 	collimator->Construct( logical_wld );
+    // }
+
+    if ( vector_of_subgeom.empty()==false )
+	cout << "Sub-Geometry Construcntion..." << endl;
+    else
+	cout << "Detector Construction has no sub-geometries" << endl;
+    
+    for ( auto geom : vector_of_subgeom ) 
+    	geom->Construct( logical_wld );    
     
     if ( parameter.verbose_level>1 )
 	cout << "DetectorConstruction::Construct() End" << endl;
@@ -228,6 +245,19 @@ void W4DetectorConstruction::PrepareMaterials()
 
     if ( parameter.verbose_level>1 ) 
 	cout << *(G4Material::GetMaterialTable()) << endl;
+}
+
+W4DetectorConstruction* W4DetectorConstruction::AddGeometry
+(P4GeometryConstruction* geom)
+{
+    if ( geom==nullptr ) {
+	cerr << "***Error*** in W4DetectorConstruction::AddGeometry : ";
+	cerr << "Attemp to set a nullptr" << endl;
+	return this;
+    }
+    
+    this->vector_of_subgeom.emplace_back( geom );
+    return this;
 }
 
 // W4DetectorConstruction* W4DetectorConstruction::Instance()

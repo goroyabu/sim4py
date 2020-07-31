@@ -16,6 +16,7 @@
 #include "W4EventAction.hpp"
 #include "W4DetectorConstruction.hpp"
 #include "W4EmStandardPhysicsSwitchingDoppler.hpp"
+#include "GeometryCollimatorMINE1.hpp"
 
 namespace wstrip_py
 {    
@@ -34,6 +35,9 @@ namespace wstrip_py
 	using sim4py::ParameterGene;
 	pybind11::class_<ParameterGene>(sub, "ParameterGene");
 
+	auto geom = pybind11::class_<P4GeometryConstruction, ParameterGene>(sub, "P4GeometryConstruction", pybind11::module_local());
+	// sim4py::define_common_method(geom);	
+	
 	// pybind11::class_<P4ActionInitialization,G4VUserActionInitialization>(sub, "P4ActionInitialization");
 	
 	// auto init = pybind11::class_<W4ActionInitialization,P4ActionInitialization>(sub, "W4ActionInitialization", pybind11::module_local());
@@ -50,10 +54,17 @@ namespace wstrip_py
 	
 	auto d = pybind11::class_<W4DetectorConstruction, ParameterGene, G4VUserDetectorConstruction>
 	    (sub, "W4DetectorConstruction", pybind11::module_local())
-	    .def("AddDetectorLayer", &W4DetectorConstruction::AddDetectorLayer);
+	    .def("AddDetectorLayer", &W4DetectorConstruction::AddDetectorLayer)
+	    .def("AddGeometry", &W4DetectorConstruction::AddGeometry);
 	sim4py::define_common_method(d);
 	//d.def(pybind11::init<>());
 	sim4py::define_as_singleton(d);
+
+	pybind11::class_<mineapp::GeometryCollimator>(sub, "GeometryCollimator", pybind11::module_local());
+	auto col = pybind11::class_<mineapp::GeometryCollimatorMINE1, mineapp::GeometryCollimator, P4GeometryConstruction, ParameterGene>
+	    (sub, "W4ParallelCollimator", pybind11::module_local());	    
+	sim4py::define_common_method(col);
+	sim4py::define_as_singleton(col);
 	
 	// .def(pybind11::init( [](){ return nullptr; }))
 	// .def_static("Instance", &W4RunAction::Instance, pybind11::return_value_policy::reference);	

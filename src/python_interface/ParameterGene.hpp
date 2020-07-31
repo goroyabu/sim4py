@@ -307,6 +307,19 @@ namespace sim4py
 	    delete mUIparamsVector3Unit;
 	    delete mUIparamsBool;
 	}
+
+	TParameterGene<ClassIDtype>& operator=(const TParameterGene<ClassIDtype>& other)
+	{
+	    if ( this == &other ) return *this;
+	    *(this->mUIparamsInt)             = *(other.mUIparamsInt);
+	    *(this->mUIparamsString)          = *(other.mUIparamsString);
+	    *(this->mUIparamsDouble)          = *(other.mUIparamsDouble);      
+	    *(this->mUIparamsDoubleUnit)      = *(other.mUIparamsDoubleUnit);     
+	    *(this->mUIparamsVector3)         = *(other.mUIparamsVector3);        
+	    *(this->mUIparamsVector3Unit)     = *(other.mUIparamsVector3Unit);    
+	    *(this->mUIparamsBool)            = *(other.mUIparamsBool);
+	    return *this;
+	}
 	
 	// virtual void InitializeListOfParameters()
 	// {

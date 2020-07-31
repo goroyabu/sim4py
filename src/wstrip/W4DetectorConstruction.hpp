@@ -8,6 +8,7 @@
 #define W4DetectorConstruction_hpp
 
 #include <ParameterGene.hpp>
+#include <P4GeometryConstruction.hpp>
 
 // #include <map>
 #include <vector>
@@ -35,6 +36,8 @@ public:
 
     void PrepareMaterials();
     int AddDetectorLayer(const std::string& material, double thickness);
+
+    W4DetectorConstruction* AddGeometry(P4GeometryConstruction* geom);    
     
 private:
 
@@ -74,6 +77,8 @@ private:
 	bool is_already_applied;
 	
     } parameter;
+
+    std::vector<P4GeometryConstruction*> vector_of_subgeom;
     
 };
 #endif
