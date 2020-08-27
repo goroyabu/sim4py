@@ -7,28 +7,15 @@
 #ifndef W4SensitiveDetector_hpp
 #define W4SensitiveDetector_hpp
 
-#include <ParameterGene.hpp>
-
-// #include "W4HitsCollection.hpp"
+#include "W4HitsCollection.hpp"
 
 #include <utility>
-
 #include <G4VSensitiveDetector.hh>
-
 // #include <TString.h>
-
 class TObject;
 class TH1D;
 
-// class W4SDBase
-// {
-
-// public:
-    
-//     W4SDBase(){}
-//     virtual ~W4SDBase(){}
-    
-// };
+#include <ParameterGene.hpp>
 
 class W4SensitiveDetector
     : public sim4py::ParameterGene, public G4VSensitiveDetector
@@ -65,25 +52,27 @@ private:
 	virtual ~W4Hit();
 
 	W4Hit& SetDetectorID(int id);
+	W4Hit& SetTime(double t);
 	W4Hit& SetStripID(int x, int y);
 	W4Hit& SetPosition(const G4ThreeVector& p);
 	W4Hit& SetDirection(const G4ThreeVector& v);
 	W4Hit& SetEnergy(double e);
 	W4Hit& SetProcessName(const std::string& name);
 
-	inline int DetectorID() { return detector_id; }
-	inline std::string ProcessName() { return process_name; }
-	inline int StripIDX() { return stripid_x; }
-	inline int StripIDY() { return stripid_y; }
-	inline double X() { return position.x(); }
-	inline double Y() { return position.y(); }
-	inline double Z() { return position.z(); }
-	inline double DirX() { return direction.x(); }
-	inline double DirY() { return direction.y(); }
-	inline double DirZ() { return direction.z(); }
-	inline double Energy() { return energy; }
-	inline int Nmerged() { return nmerged_hits; }
-	inline std::string MergedProcessName() { return merged_process_name; }
+	inline int DetectorID() const { return detector_id; }
+	inline double Time() const { return global_time; }
+	inline std::string ProcessName() const { return process_name; }
+	inline int StripIDX() const { return stripid_x; }
+	inline int StripIDY() const { return stripid_y; }
+	inline double X() const { return position.x(); }
+	inline double Y() const { return position.y(); }
+	inline double Z() const { return position.z(); }
+	inline double DirX() const { return direction.x(); }
+	inline double DirY() const { return direction.y(); }
+	inline double DirZ() const { return direction.z(); }
+	inline double Energy() const { return energy; }
+	inline int Nmerged() const { return nmerged_hits; }
+	inline std::string MergedProcessName() const { return merged_process_name; }
 	
 	bool IsSamePixel(const W4Hit& other);
 	bool IsAdjacentPixel(const W4Hit& other);
@@ -105,6 +94,7 @@ private:
 	{
 	    detector_id = other.detector_id;
 	    process_name = other.process_name;
+	    global_time = other.global_time;
 	    stripid_x = other.stripid_x;
 	    stripid_y = other.stripid_y;
 	    position = other.position;
@@ -119,6 +109,7 @@ private:
 	
 	int detector_id;
 	std::string process_name;
+	double global_time;
 	int stripid_x;
 	int stripid_y;
 	G4ThreeVector position;
@@ -136,6 +127,7 @@ private:
     // W4HitsCollection * hits_collection;
     //std::vector<W4Hit*> hits_collection;
     std::vector<W4Hit> hits_collection;
+    W4DSDHitsCollection * dsd_hits_collection;
     
     G4int detector_id;
     G4String grid_xaxis_name;

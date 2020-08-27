@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 using std::cout;
+using std::cerr;
 using std::endl;
 
 #include <G4SingleParticleSource.hh>
@@ -43,7 +44,11 @@ P4GeneralParticleSource::P4GeneralParticleSource()
     // DefineParameter<double,double,double>("polarization", 0, 0, 0);
     
     DefineParameter<std::string>("pos_type", "Volume");
+    // Candidates of pos_type : Point Beam Plane Surface Volume
+
     DefineParameter<std::string>("pos_shape", "Sphere");
+    // Candidates of pos_shape : Circle Annulus Ellipse Square Rectangle Sphere Ellipsoid Cylinder Para
+    
     DefineParameter<double,double,double,unit>("pos_centre", 0.0, 0.0, 0.0, sim4py::mm);
     DefineParameter<double,double,double>("pos_rotation1", 0.0, 0.0, 0.0);
     DefineParameter<double,double,double>("pos_rotation2", 0.0, 0.0, 0.0);    
@@ -143,10 +148,17 @@ void P4GeneralParticleSource::apply_parameters()
     // single_source->SetParticlePosition( G4ThreeVector(px*pu, py*pu, pz*pu) );
     
     auto [ pos_type ] = GetParameter<std::string>("pos_type");
-    single_source->GetPosDist()->SetPosDisType( pos_type.c_str() );
+    std::vector<std::string> pos_type_cand
+	= { "Point", "Beam", "Plane", "Surface", "Volume" };
+    if ( match_candidates( "pos_type", pos_type, pos_type_cand ) ) 
+	single_source->GetPosDist()->SetPosDisType( pos_type.c_str() );	
 
     auto [ pos_shape ] = GetParameter<std::string>("pos_shape");
-    single_source->GetPosDist()->SetPosDisShape( pos_shape.c_str() );
+    std::vector<std::string> pos_shape_cand
+	= { "Circle", "Annulus", "Ellipse", "Square",
+	    "Rectangle", "Sphere", "Ellipsoid", "Cylinder", "Para" };
+    if ( match_candidates( "pos_shape", pos_shape, pos_shape_cand ) )    
+	single_source->GetPosDist()->SetPosDisShape( pos_shape.c_str() );
     
     auto [ x, y, z, u ]
 	= GetParameter<double, double, double, unit>("pos_centre");
@@ -157,12 +169,12 @@ void P4GeneralParticleSource::apply_parameters()
     // auto [ r2x, r2y, r2z ] = GetParameter<double,double,double>("pos_rotation2");
     // single_source->GetPosDist()->SetPosRot2( G4ThreeVector(r2x,r2y,r2z) );
     
-    // auto [ halfx, ux ] = GetParameter<double, unit>("pos_halfx");
-    // single_source->GetPosDist()->SetHalfX( halfx*ux );
-    // auto [ halfy, uy ] = GetParameter<double, unit>("pos_halfy");
-    // single_source->GetPosDist()->SetHalfY( halfy*uy );
-    // auto [ halfz, uz ] = GetParameter<double, unit>("pos_halfz");
-    // single_source->GetPosDist()->SetHalfZ( halfz*uz );
+    auto [ halfx, ux ] = GetParameter<double, unit>("pos_halfx");
+    single_source->GetPosDist()->SetHalfX( halfx*ux );
+    auto [ halfy, uy ] = GetParameter<double, unit>("pos_halfy");
+    single_source->GetPosDist()->SetHalfY( halfy*uy );
+    auto [ halfz, uz ] = GetParameter<double, unit>("pos_halfz");
+    single_source->GetPosDist()->SetHalfZ( halfz*uz );
 
     auto [ radius, ur ] = GetParameter<double,unit>("pos_radius");
     single_source->GetPosDist()->SetRadius( radius*ur );
@@ -222,4 +234,22 @@ void P4GeneralParticleSource::ion_level_command()
     }
     SetParticleDefinition( ion );
     SetParticleCharge( charge*CLHEP::eplus );
+}
+
+bool P4GeneralParticleSource::match_candidates
+(const std::string& key, const std::string& input, std::vector<std::string>& cand_list)
+{
+    for ( auto cand : cand_list ) {
+	if ( input==cand ) return true;
+    }
+
+    cerr << "***Error*** in P4GeneralParticleSource : ";
+    cerr << "Input value " << input << " is not matched candidates." << endl;
+    cerr << "Candidates of " << key << " = [ ";
+    for ( auto cand : cand_list ) {
+	cerr << cand << " ";
+    }
+    cerr << "]" << endl;    
+    
+    return false;
 }

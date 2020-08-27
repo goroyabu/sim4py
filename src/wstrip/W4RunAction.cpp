@@ -82,6 +82,7 @@ void W4RunAction::BeginOfRunAction(const G4Run*)
     analysis_manager->CreateNtupleIColumn( "hit_pattern" );
     analysis_manager->CreateNtupleDColumn( "etotal" );
     analysis_manager->CreateNtupleIColumnV( "detid",   128 );
+    analysis_manager->CreateNtupleDColumnV( "global_time",   128 );
     analysis_manager->CreateNtupleIColumnV( "strip_x", 128 );
     analysis_manager->CreateNtupleIColumnV( "strip_y", 128 );    
     analysis_manager->CreateNtupleDColumnV( "edep",    128 );
@@ -93,6 +94,10 @@ void W4RunAction::BeginOfRunAction(const G4Run*)
     analysis_manager->CreateNtupleDColumnV( "dir_z", 128 );    
     analysis_manager->CreateNtupleDColumnV( "pixel_center_x", 128 );
     analysis_manager->CreateNtupleDColumnV( "pixel_center_y", 128 );
+    analysis_manager->CreateNtupleDColumn( "init_e" );
+    analysis_manager->CreateNtupleDColumn( "init_x" );
+    analysis_manager->CreateNtupleDColumn( "init_y" );
+    analysis_manager->CreateNtupleDColumn( "init_z" );
     analysis_manager->CreateNtupleSColumn( "proc_name" );
     analysis_manager->CreateNtupleIColumnV( "nmerged_raw_hits", 128 );
     analysis_manager->CreateNtupleSColumn( "raw_proc_name" );    

@@ -27,6 +27,9 @@ private:
     void apply_parameters();
     void ion_command();
     void ion_level_command();
+
+    bool match_candidates
+    (const std::string& key, const std::string& input, std::vector<std::string>& cand_list);
     
 };
 

@@ -62,7 +62,7 @@ setup(
     name='sim4py',
     version='1.0.1',
     author='Goro Yabu',
-    author_email='goto.yabu@gmail.com',
+    author_email='goto.yabu@ipmu.jp',
     description='Monte-Carlo Simulator of Double-sided strip detector',
     long_description='',
     ext_modules=[CMakeExtension('sim4py')],

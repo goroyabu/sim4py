@@ -18,6 +18,8 @@
 #include "W4EmStandardPhysicsSwitchingDoppler.hpp"
 #include "GeometryCollimatorMINE1.hpp"
 
+#include "W4DoublesidedStripDetector.hpp"
+
 namespace wstrip_py
 {    
     void define_wstrip(pybind11::module& main)
@@ -35,7 +37,8 @@ namespace wstrip_py
 	using sim4py::ParameterGene;
 	pybind11::class_<ParameterGene>(sub, "ParameterGene");
 
-	auto geom = pybind11::class_<P4GeometryConstruction, ParameterGene>(sub, "P4GeometryConstruction", pybind11::module_local());
+	auto geom = pybind11::class_<P4GeometryConstruction, ParameterGene>( sub, "P4GeometryConstruction", pybind11::module_local() );
+	pybind11::class_<P4PVConstruct, ParameterGene>( sub, "P4PVConstruct", pybind11::module_local() );
 	// sim4py::define_common_method(geom);	
 	
 	// pybind11::class_<P4ActionInitialization,G4VUserActionInitialization>(sub, "P4ActionInitialization");
@@ -65,6 +68,12 @@ namespace wstrip_py
 	    (sub, "W4ParallelCollimator", pybind11::module_local());	    
 	sim4py::define_common_method(col);
 	sim4py::define_as_singleton(col);
+
+	auto dsd = pybind11::class_<W4DoublesidedStripDetector, P4PVConstruct, ParameterGene>
+	    ( sub, "W4DoublesidedStripDetector", pybind11::module_local() )
+	    .def("AddDetectorLayer", pybind11::overload_cast<const std::string&, double>(&W4DoublesidedStripDetector::AddDetectorLayer) );
+	sim4py::define_common_method( dsd );
+	sim4py::define_as_singleton( dsd );
 	
 	// .def(pybind11::init( [](){ return nullptr; }))
 	// .def_static("Instance", &W4RunAction::Instance, pybind11::return_value_policy::reference);	

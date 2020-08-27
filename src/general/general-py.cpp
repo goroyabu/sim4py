@@ -35,6 +35,7 @@
 #include <P4RootAnalysisManager.hpp>
 
 #include <P4DetectorConstruction.hpp>
+#include <P4PVConstruct.hpp>
 
 namespace general_py
 {
@@ -238,9 +239,17 @@ namespace general_py
     void define_detector(pybind11::module& main)
     {
 	pybind11::module sub = main.def_submodule("detector","");
-	auto det = pybind11::class_<P4DetectorConstruction>
-	    (sub, "P4DetectorConstruction", pybind11::module_local());
-	sim4py::define_as_singleton(det);
+
+	pybind11::class_<G4VUserDetectorConstruction>( sub, "G4VUserDetectorConstruction", pybind11::module_local() );
+	
+	auto det = pybind11::class_<P4DetectorConstruction, sim4py::ParameterGene, G4VUserDetectorConstruction>
+	    (sub, "P4DetectorConstruction", pybind11::module_local())
+	    .def("AddVolume", &P4DetectorConstruction::AddVolume);
+	sim4py::define_common_method( det );
+	sim4py::define_as_singleton( det );
+
+	pybind11::class_<P4PVConstruct, sim4py::ParameterGene>
+	    ( sub, "P4PVConstruct" );	
     }
     
 }
