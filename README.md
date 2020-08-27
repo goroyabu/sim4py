@@ -1,6 +1,10 @@
 # sim4py
 Monte-Carlo Simulator using Geant4 with Python interface
 
+詳しくは https://github.com/goroyabu/sim4py/wiki
+
+See details on https://github.com/goroyabu/sim4py/wiki
+
 ## Concept
 
  - python で条件設定を変更可能なモンテカルロシミュレーションソフト
@@ -47,4 +51,14 @@ pip 以外の python パッケージ管理システムを使っている場合�
 
 ## Tutorial
 
-あとで書きます。
+コンプトンカメラのシミュレーションの example を走らせる場合
+```
+ $ cd sim4py/example/compton_camera/
+ $ ./run_simulation.py
+```
+
+CdTeガンマカメラのシミュレーションの example を走らせる場合
+```
+ $ cd sim4py/example/gamma_camera/
+ $ ./run_simulation.py
+```
