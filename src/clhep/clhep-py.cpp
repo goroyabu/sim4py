@@ -72,7 +72,12 @@ namespace clhep_py
 	sub.attr("fm")       = pybind11::cast( fm );     
 	sub.attr("rad")      = pybind11::cast( rad );    
 	sub.attr("mrad")     = pybind11::cast( mrad );   
-	sub.attr("deg")      = pybind11::cast( deg );    
+	sub.attr("deg")      = pybind11::cast( deg );
+	sub.attr("ns")       = pybind11::cast( ns );
+	sub.attr("s")       = pybind11::cast( s );
+	sub.attr("ms")       = pybind11::cast( ms );
+	sub.attr("us")       = pybind11::cast( us );
+	sub.attr("ps")       = pybind11::cast( ps );    
 	sub.attr("eV")       = pybind11::cast( eV );     
 	sub.attr("keV")      = pybind11::cast( keV );    
 	sub.attr("MeV")      = pybind11::cast( MeV );    

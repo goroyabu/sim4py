@@ -254,8 +254,11 @@ void P4RunManager::SetupVisualization()
     ui_manager->ApplyCommand("/vis/scene/add/hits");
     ui_manager->ApplyCommand("/vis/filtering/trajectories/create/particleFilter");
     ui_manager->ApplyCommand("/vis/filtering/trajectories/particleFilter-0/add gamma");
+    ui_manager->ApplyCommand("/vis/filtering/trajectories/particleFilter-0/add e-");
+    ui_manager->ApplyCommand("/vis/filtering/trajectories/particleFilter-0/add ion");
     ui_manager->ApplyCommand("/vis/modeling/trajectories/create/drawByParticleID");
     ui_manager->ApplyCommand("/vis/modeling/trajectories/drawByParticleID-0/set e- blue");
+    ui_manager->ApplyCommand("/vis/modeling/trajectories/drawByParticleID-0/set ion red");
     ui_manager->ApplyCommand("/vis/scene/endOfEventAction accumulate");
     ui_manager->ApplyCommand("/vis/viewer/set/autoRefresh true");
     ui_manager->ApplyCommand("/vis/verbose warnings");

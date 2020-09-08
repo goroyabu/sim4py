@@ -19,6 +19,7 @@ class W4DSDHit : public G4VHit
 private:
     
     int detector_id;
+    int detector_material;
     std::string process_name;
     double global_time;
     int stripid_x;
@@ -29,6 +30,7 @@ private:
 
     double pixel_center_x;
     double pixel_center_y;
+    double pixel_center_z;
     
     int nmerged_hits;
     std::string merged_process_name;
@@ -41,6 +43,7 @@ public:
     W4DSDHit()
     {
 	detector_id = -1;
+	detector_material = 0;
 	process_name = "None";
 	global_time = -1;
 	stripid_x = -1;
@@ -50,6 +53,7 @@ public:
 	energy = 0;
 	pixel_center_x = 0;
 	pixel_center_y = 0;
+	pixel_center_z = 0;
 	nmerged_hits = 1;
 	merged_process_name = "None";
 	is_merge_same_pixel = true;
@@ -58,6 +62,7 @@ public:
     W4DSDHit(const W4DSDHit& other)
     {
 	detector_id = other.detector_id;
+	detector_material = other.detector_material;
 	process_name = other.process_name;
 	global_time = other.global_time;
 	stripid_x = other.stripid_x;
@@ -67,6 +72,7 @@ public:
 	energy = other.energy;
 	pixel_center_x = other.pixel_center_x;
 	pixel_center_y = other.pixel_center_y;
+	pixel_center_z = other.pixel_center_z;
 	nmerged_hits = other.nmerged_hits;
 	merged_process_name = other.merged_process_name;
 	is_merge_same_pixel = other.is_merge_same_pixel;
@@ -79,6 +85,7 @@ public:
     W4DSDHit& operator=(const W4DSDHit& other)
     {
 	detector_id  = other.detector_id;
+	detector_material = other.detector_material;
 	process_name = other.process_name;
 	global_time  = other.global_time;
 	stripid_x    = other.stripid_x;
@@ -87,7 +94,8 @@ public:
 	direction    = other.direction;
 	energy       = other.energy;
 	pixel_center_x = other.pixel_center_x;
-	pixel_center_y = other.pixel_center_y;	
+	pixel_center_y = other.pixel_center_y;
+	pixel_center_z = other.pixel_center_z;
 	nmerged_hits = other.nmerged_hits;
 	merged_process_name = other.merged_process_name;
 	is_merge_same_pixel = other.is_merge_same_pixel;
@@ -105,15 +113,17 @@ public:
 public:    
 
     inline W4DSDHit& SetDetectorID(int id)                   { detector_id = id; return *this; }
+    inline W4DSDHit& SetDetectorMaterial(int mate)           { detector_material = mate; return *this; }
     inline W4DSDHit& SetTime(double t)                       { global_time = t; return *this; }
     inline W4DSDHit& SetStripID(int x, int y)                { stripid_x = x; stripid_y = y; return *this; }
     inline W4DSDHit& SetPosition(const G4ThreeVector& p)     { position = p; return *this;}
     inline W4DSDHit& SetDirection(const G4ThreeVector& v)    { direction = v; return *this; }
     inline W4DSDHit& SetEnergy(double e)                     { energy = e; return *this; }
-    inline W4DSDHit& SetPixelCenter(double x, double y)
+    inline W4DSDHit& SetPixelCenter(double x, double y, double z)
     {
 	this->pixel_center_x = x;
 	this->pixel_center_y = y;
+	this->pixel_center_z = z;
 	return *this;
     }
     inline W4DSDHit& SetProcessName(const std::string& name) { process_name = name; return *this; }
@@ -125,6 +135,7 @@ public:
     }
     
     inline int DetectorID()          const { return detector_id; }
+    inline int Material()            const { return detector_material; }
     inline double Time()             const { return global_time; }
     inline std::string ProcessName() const { return process_name; }
     inline int StripIDX()            const { return stripid_x; }
@@ -138,6 +149,7 @@ public:
     inline double Energy()           const { return energy; }
     inline double PixelCenterX()     const { return pixel_center_x; }
     inline double PixelCenterY()     const { return pixel_center_y; }
+    inline double PixelCenterZ()     const { return pixel_center_z; }
     inline int Nmerged()             const { return nmerged_hits; }
     inline std::string MergedProcessName() const { return merged_process_name; }
     inline bool IsMergeSamePixel()     const { return is_merge_same_pixel; }

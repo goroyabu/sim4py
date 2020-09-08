@@ -52,16 +52,16 @@ void W4EventAction::BeginOfEventAction(const G4Event* event)
     G4int eventID = event->GetEventID();
     analysis_manager->FillNtupleIColumnName( "eventID", eventID );
 
-    auto primary = event->GetPrimaryVertex();
-    auto e = primary->GetPrimary()->GetTotalEnergy();
-    auto x = primary->GetX0();
-    auto y = primary->GetY0();
-    auto z = primary->GetZ0();
+    // auto primary = event->GetPrimaryVertex();
+    // auto e = primary->GetPrimary()->GetTotalEnergy();
+    // auto x = primary->GetX0();
+    // auto y = primary->GetY0();
+    // auto z = primary->GetZ0();
 
-    analysis_manager->FillNtupleDColumnName( "init_e", e/CLHEP::keV );
-    analysis_manager->FillNtupleDColumnName( "init_x", x );
-    analysis_manager->FillNtupleDColumnName( "init_y", y );
-    analysis_manager->FillNtupleDColumnName( "init_z", z );
+    // analysis_manager->FillNtupleDColumnName( "init_e", e/CLHEP::keV );
+    // analysis_manager->FillNtupleDColumnName( "init_x", x );
+    // analysis_manager->FillNtupleDColumnName( "init_y", y );
+    // analysis_manager->FillNtupleDColumnName( "init_z", z );
     
     if ( eventID%print_frequency==0 ) {
 	auto ima = std::chrono::system_clock::now();
@@ -101,6 +101,7 @@ void W4EventAction::EndOfEventAction(const G4Event*event)
     for ( auto hit : merged_hits ) {
         analysis_manager->FillNtupleDColumnVName( "edep",              hit.Energy() );
         analysis_manager->FillNtupleIColumnVName( "detid",             hit.DetectorID() );
+	analysis_manager->FillNtupleIColumnVName( "material",          hit.Material() );
         analysis_manager->FillNtupleDColumnVName( "global_time",       hit.Time() );
         analysis_manager->FillNtupleIColumnVName( "strip_x",           hit.StripIDX()  );
         analysis_manager->FillNtupleIColumnVName( "strip_y",           hit.StripIDY()   );
@@ -115,8 +116,9 @@ void W4EventAction::EndOfEventAction(const G4Event*event)
         // auto [ x, y ] = GetCenterOfPixel( hit.StripIDX(), hit.StripIDY() );
         analysis_manager->FillNtupleDColumnVName( "pixel_center_x",    hit.PixelCenterX() );
         analysis_manager->FillNtupleDColumnVName( "pixel_center_y",    hit.PixelCenterY() );
+	analysis_manager->FillNtupleDColumnVName( "pixel_center_z",    hit.PixelCenterZ() );
         analysis_manager->FillNtupleIColumnVName( "nmerged_raw_hits",  hit.Nmerged() );
-        analysis_manager->AddNtupleSColumnName  ( "raw_proc_name",     hit.MergedProcessName() );
+        // analysis_manager->AddNtupleSColumnName  ( "raw_proc_name",     hit.MergedProcessName() );
     }    
     
     if ( analysis_manager->GetNtupleIColumn("nhits")>=save_nhit_min ) {

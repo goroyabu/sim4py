@@ -29,6 +29,8 @@ P4GeneralParticleSource::P4GeneralParticleSource()
     DefineParameter<double,double,double>("direction", 1.0, 0.0, 0.0);
     DefineParameter<double,unit>("energy", 511.0, sim4py::keV);
     DefineParameter<double,double,double,unit>("position", 0.0, 0.0, 0.0, sim4py::mm);
+    DefineParameter<double,unit>("time", 0.0, sim4py::ns);
+    
     DefineParameter<bool>("use_ion", false);
     DefineParameter<int>("ion_atomic_number", -1);
     DefineParameter<int>("ion_atomic_mass", -1);
@@ -40,7 +42,6 @@ P4GeneralParticleSource::P4GeneralParticleSource()
     DefineParameter<int>("ionL_charge", 0);
     DefineParameter<int>("ionL_level_number", 0);
 
-    // DefineParameter<double,unit>("time", 0, sim4py::nanosecond);
     // DefineParameter<double,double,double>("polarization", 0, 0, 0);
     
     DefineParameter<std::string>("pos_type", "Volume");
@@ -124,7 +125,7 @@ void P4GeneralParticleSource::apply_parameters()
 	auto table = G4ParticleTable::GetParticleTable();
 	auto particle_def = table->FindParticle( particle.c_str() );
 	if ( particle_def!=nullptr ) {
-	    SetParticleDefinition( particle_def );
+	    single_source->SetParticleDefinition( particle_def );
 	    if ( verbose_level>1 ) cout << particle << " is set"  << endl;  
 	}
 	// else {
@@ -197,10 +198,12 @@ void P4GeneralParticleSource::apply_parameters()
     auto [ angle_maxtheta, umaxt ] = GetParameter<double, unit>("ang_maxtheta");
     single_source->GetAngDist()->SetMaxTheta( angle_maxtheta*umaxt );
 
-    auto [ energy_type ] = GetParameter<std::string>("ene_type");
-    single_source->GetEneDist()->SetEnergyDisType( energy_type.c_str() );
-    auto [ mono_energy, umono ] = GetParameter<double,unit>("ene_mono");
-    single_source->GetEneDist()->SetMonoEnergy( mono_energy*umono );   
+    if ( use_ion==false && use_ionL==false ) {
+	auto [ energy_type ] = GetParameter<std::string>("ene_type");
+	single_source->GetEneDist()->SetEnergyDisType( energy_type.c_str() );
+	auto [ mono_energy, umono ] = GetParameter<double,unit>("ene_mono");
+	single_source->GetEneDist()->SetMonoEnergy( mono_energy*umono );
+    }
 }
 void P4GeneralParticleSource::ion_command()
 {
@@ -215,8 +218,13 @@ void P4GeneralParticleSource::ion_command()
 	cout << "Ion with Z=" << number;
 	cout << " A=" << mass << "is not defined" << endl;    
     }
-    SetParticleDefinition( ion );
-    SetParticleCharge( charge*CLHEP::eplus );
+    else if ( verbose_level>0 ){
+	cout << "Ion " << ion->GetParticleName() << " is set " << endl;
+	cout << "stable=" << ion->GetPDGStable() << endl;
+    }
+    auto single_source = G4GeneralParticleSource::GetCurrentSource();
+    single_source->SetParticleDefinition( ion );
+    single_source->SetParticleCharge( charge*CLHEP::eplus );
 }
 
 void P4GeneralParticleSource::ion_level_command()
@@ -232,8 +240,9 @@ void P4GeneralParticleSource::ion_level_command()
 	cout << "Ion with Z=" << number << " A=" << mass;
 	cout << ", I = " << level << "is not defined" << endl;    
     }
-    SetParticleDefinition( ion );
-    SetParticleCharge( charge*CLHEP::eplus );
+    auto single_source = G4GeneralParticleSource::GetCurrentSource();
+    single_source->SetParticleDefinition( ion );
+    single_source->SetParticleCharge( charge*CLHEP::eplus );
 }
 
 bool P4GeneralParticleSource::match_candidates

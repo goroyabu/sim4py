@@ -14,6 +14,7 @@
 #include "P4ActionInitialization.hpp"
 #include "W4RunAction.hpp"
 #include "W4EventAction.hpp"
+#include "W4SteppingAction.hpp"
 #include "W4DetectorConstruction.hpp"
 #include "W4EmStandardPhysicsSwitchingDoppler.hpp"
 #include "GeometryCollimatorMINE1.hpp"
@@ -30,8 +31,9 @@ namespace wstrip_py
 	pybind11::module sub = main.def_submodule("wstrip","");	
 	
 	pybind11::class_<G4VUserActionInitialization>(sub, "G4VUserActionInitialization");
-	pybind11::class_<G4UserRunAction>(sub, "G4UserRunAction");
+	pybind11::class_<G4UserRunAction>(sub, "G4UserRunAction");	
 	pybind11::class_<G4UserEventAction>(sub, "G4UserEventAction");
+	pybind11::class_<G4UserSteppingAction>(sub, "G4UserSteppingAction");
 	pybind11::class_<G4VUserDetectorConstruction>(sub, "G4VUserDetectorConstruction");
 
 	using sim4py::ParameterGene;
@@ -54,6 +56,10 @@ namespace wstrip_py
 	auto event = pybind11::class_<W4EventAction, ParameterGene, G4UserEventAction>(sub, "W4EventAction", pybind11::module_local());
 	sim4py::define_common_method(event);
 	sim4py::define_as_singleton(event);
+	
+	auto stepping = pybind11::class_<W4SteppingAction, ParameterGene, G4UserSteppingAction>(sub, "W4SteppingAction", pybind11::module_local());
+	sim4py::define_common_method(stepping);
+	sim4py::define_as_singleton(stepping);
 	
 	auto d = pybind11::class_<W4DetectorConstruction, ParameterGene, G4VUserDetectorConstruction>
 	    (sub, "W4DetectorConstruction", pybind11::module_local())

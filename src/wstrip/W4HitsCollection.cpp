@@ -15,11 +15,13 @@ W4DSDHit W4DSDHit::MergeOnEdepMax
     auto merged = hit1;    
     if ( hit1.energy < hit2.energy ) {
 	merged.SetPosition( hit2.position );
-	merged.SetPixelCenter( hit2.pixel_center_x, hit2.pixel_center_y );
+	merged.SetPixelCenter
+	    ( hit2.pixel_center_x, hit2.pixel_center_y, hit2.pixel_center_z );
     }
     else {
 	merged.SetPosition( hit1.position );
-	merged.SetPixelCenter( hit1.pixel_center_x, hit1.pixel_center_y );
+	merged.SetPixelCenter
+	    ( hit2.pixel_center_x, hit2.pixel_center_y, hit2.pixel_center_z );
     }
     merged.SetTime( hit1.global_time );
     merged.SetEnergy( hit1.energy + hit2.energy );

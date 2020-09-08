@@ -116,7 +116,12 @@ namespace sim4py
     static const UnitDefinition fm        ( "fermi",               "fm",     "Length",           CLHEP::fermi );               
     static const UnitDefinition rad       ( "radian",              "rad",    "Angle",            CLHEP::radian );              
     static const UnitDefinition mrad      ( "milliradian",         "mrad",   "Angle",            CLHEP::milliradian );         
-    static const UnitDefinition deg       ( "degree",              "deg",    "Angle",            CLHEP::degree );              
+    static const UnitDefinition deg       ( "degree",              "deg",    "Angle",            CLHEP::degree );
+    static const UnitDefinition ns        ( "nanosecond",          "ns",     "Time",             CLHEP::nanosecond );
+    static const UnitDefinition s         ( "second",              "s",      "Time",             CLHEP::second );
+    static const UnitDefinition ms        ( "millisecond",         "ms",     "Time",             CLHEP::millisecond );
+    static const UnitDefinition us        ( "microsecond",         "us",     "Time",             CLHEP::microsecond );
+    static const UnitDefinition ps        ( "picosecond",          "ps",     "Time",             CLHEP::picosecond );
     static const UnitDefinition eV        ( "electronvolt",        "eV",     "Energy",           CLHEP::electronvolt );        
     static const UnitDefinition keV       ( "kiloelectronvolt",    "keV",    "Energy",           CLHEP::kiloelectronvolt );    
     static const UnitDefinition MeV       ( "megaelectronvolt",    "MeV",    "Energy",           CLHEP::megaelectronvolt );    

@@ -37,6 +37,7 @@ set( files_analysis
 set( files_wstrip
   wstrip/W4RunAction.cpp
   wstrip/W4EventAction.cpp
+  wstrip/W4SteppingAction.cpp
   wstrip/W4DetectorConstruction.cpp
   wstrip/W4SensitiveDetector.cpp
   wstrip/GeometryCollimatorMINE1.cpp

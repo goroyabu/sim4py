@@ -42,6 +42,7 @@ W4SensitiveDetector::W4SensitiveDetector( G4String name )
     // hits_collection = nullptr;
 
     detector_id = 0;
+    detector_material = 0;
     grid_xaxis = nullptr;
     grid_yaxis = nullptr;
     grid_zaxis = nullptr;
@@ -89,7 +90,7 @@ void W4SensitiveDetector::Initialize( G4HCofThisEvent* hce )
     // else
     // 	dsd_hits_collection = dynamic_cast<W4DSDHitsCollection*>( hce->GetHC( 0 ) );
     
-    hits_collection.clear();
+    // hits_collection.clear();
 }
 
 G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
@@ -116,7 +117,7 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
 
     if ( edep <= 0.0 || length <= 0.0 ) return true;
     
-    auto [ strip_x , strip_y ] = GetStripID( pos );
+    auto [ strip_x, strip_y, strip_z ] = GetStripID( pos );
     
     // W4Hit hit;
     // hit.SetDetectorID( GetDetectorID() );
@@ -130,6 +131,7 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
     
     auto hit = new W4DSDHit();
     hit->SetDetectorID( GetDetectorID() );
+    hit->SetDetectorMaterial( GetDetectorMaterial() );
     hit->SetProcessName( process_name );
     hit->SetTime( global_time/CLHEP::ns );
     hit->SetStripID( strip_x, strip_y );
@@ -137,6 +139,9 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
     hit->SetDirection( dir/CLHEP::mm );
     hit->SetEnergy( edep/CLHEP::keV );
     hit->SetMerge( is_merge_same_pixel, is_merge_adjacent_pixel );
+    // auto [ x, y, z ] = GetCenterOfPixel( hit->StripIDX(), hit->StripIDY() );
+    auto [ x, y, z ] = GetCenterOfPixel( strip_x, strip_y, strip_z );
+    hit->SetPixelCenter( x, y, z );
     dsd_hits_collection->insert( hit );
 
     return true;
@@ -203,6 +208,15 @@ G4int W4SensitiveDetector::SetDetectorID( G4int id )
     detector_id = id; return 0;
 }
 
+G4int W4SensitiveDetector::GetDetectorMaterial()
+{
+    return detector_material;
+}
+G4int W4SensitiveDetector::SetDetectorMaterial( G4int mate )
+{
+    detector_material = mate; return 0;
+}
+
 G4int W4SensitiveDetector::SetGridXaxis( G4int nbins, G4double min, G4double max )
 {
     if ( !grid_xaxis ) return -1;
@@ -224,18 +238,22 @@ G4int W4SensitiveDetector::SetGridZaxis( G4int nbins, G4double min, G4double max
     return 0;
 }
 
-std::pair<G4int, G4int> W4SensitiveDetector::GetStripID( const G4ThreeVector& pos )
+std::tuple<G4int, G4int, G4int> W4SensitiveDetector::GetStripID
+( const G4ThreeVector& pos )
 {
     auto x = grid_xaxis->FindBin( pos.x() ) - 1;
     auto y = grid_yaxis->FindBin( pos.y() ) - 1;
-    return std::make_pair(x, y);
+    auto z = grid_zaxis->FindBin( pos.z() ) - 1;
+    return std::make_tuple(x, y, z);
 }
 
-std::pair<G4double, G4double> W4SensitiveDetector::GetCenterOfPixel( G4int strip_x, G4int strip_y )
+std::tuple<G4double, G4double, G4double> W4SensitiveDetector::GetCenterOfPixel
+( G4int strip_x, G4int strip_y, G4int strip_z )
 {
     auto x = grid_xaxis->GetBinCenter( strip_x );
-    auto y = grid_xaxis->GetBinCenter( strip_y );
-    return std::make_pair(x, y);
+    auto y = grid_yaxis->GetBinCenter( strip_y );
+    auto z = grid_zaxis->GetBinCenter( strip_z );
+    return std::make_tuple(x, y, z);
 }
 
 G4String W4SensitiveDetector::GetUniqueObjectName(const G4String& name)
@@ -271,253 +289,253 @@ void W4SensitiveDetector::ApplyParameters()
     is_applied_parameters = true;
 }
 
-std::vector<W4SensitiveDetector::W4Hit> W4SensitiveDetector::MergeHits(std::vector<W4SensitiveDetector::W4Hit> hits)
-{    
-    std::vector<W4Hit> merged_hits;
+// std::vector<W4SensitiveDetector::W4Hit> W4SensitiveDetector::MergeHits(std::vector<W4SensitiveDetector::W4Hit> hits)
+// {    
+//     std::vector<W4Hit> merged_hits;
 
-    while ( hits.empty()==false ) {
+//     while ( hits.empty()==false ) {
 	
-	int nhits = static_cast<int>( hits.size() );
-	std::vector<W4Hit> buffer;
+// 	int nhits = static_cast<int>( hits.size() );
+// 	std::vector<W4Hit> buffer;
 	
-	for ( int ihit=nhits-1; ihit>=0; --ihit ) {		
+// 	for ( int ihit=nhits-1; ihit>=0; --ihit ) {		
 	    
-	    if ( buffer.empty()==true ) {
-		buffer.emplace_back( hits[ihit] );
-		hits.erase( hits.begin()+ihit );
-		continue;
-	    }
+// 	    if ( buffer.empty()==true ) {
+// 		buffer.emplace_back( hits[ihit] );
+// 		hits.erase( hits.begin()+ihit );
+// 		continue;
+// 	    }
 	    
-	    if ( hits[ihit].ExistSamePixelAmong( buffer ) &&
-		 is_merge_same_pixel==true ) {
+// 	    if ( hits[ihit].ExistSamePixelAmong( buffer ) &&
+// 		 is_merge_same_pixel==true ) {
 		
-		buffer.emplace_back( hits[ihit] );
-		hits.erase( hits.begin()+ihit );
-		// cout << "same " << ihit << endl;
-		continue;
+// 		buffer.emplace_back( hits[ihit] );
+// 		hits.erase( hits.begin()+ihit );
+// 		// cout << "same " << ihit << endl;
+// 		continue;
 		
-	    }
+// 	    }
 
-	    if ( hits[ihit].ExistAdjacentPixelAmong( buffer ) &&
-		 is_merge_adjacent_pixel==true ) {
+// 	    if ( hits[ihit].ExistAdjacentPixelAmong( buffer ) &&
+// 		 is_merge_adjacent_pixel==true ) {
 
-		buffer.emplace_back( hits[ihit] );
-		hits.erase( hits.begin()+ihit );
-		// cout << "ad" << endl;
-		continue;
+// 		buffer.emplace_back( hits[ihit] );
+// 		hits.erase( hits.begin()+ihit );
+// 		// cout << "ad" << endl;
+// 		continue;
 
-	    }	    		
-	}
+// 	    }	    		
+// 	}
 
-	auto merged = W4Hit::MergeThem( buffer, &W4Hit::MergeOnFirstHit );
-	merged_hits.emplace_back( merged );	    
+// 	auto merged = W4Hit::MergeThem( buffer, &W4Hit::MergeOnFirstHit );
+// 	merged_hits.emplace_back( merged );	    
 	
-    }
+//     }
 
-    return merged_hits;    
-}
+//     return merged_hits;    
+// }
 
-W4SensitiveDetector::W4Hit::W4Hit()    
-{
-    detector_id = -1;
-    process_name = "None";
-    global_time = -1;
-    stripid_x = -1;
-    stripid_y = -1;
-    position = G4ThreeVector(0,0,0);
-    direction = G4ThreeVector(0,0,0);
-    energy = 0;
-    nmerged_hits = 1;
-    merged_process_name = "None";
-}
-W4SensitiveDetector::W4Hit::W4Hit(const W4Hit& other)
-{
-    detector_id = other.detector_id;
-    process_name = other.process_name;
-    global_time = other.global_time;
-    stripid_x = other.stripid_x;
-    stripid_y = other.stripid_y;
-    position = other.position;
-    direction = other.direction;
-    energy = other.energy;
-    nmerged_hits = other.nmerged_hits;
-    merged_process_name = other.merged_process_name;
-}
+// W4SensitiveDetector::W4Hit::W4Hit()    
+// {
+//     detector_id = -1;
+//     process_name = "None";
+//     global_time = -1;
+//     stripid_x = -1;
+//     stripid_y = -1;
+//     position = G4ThreeVector(0,0,0);
+//     direction = G4ThreeVector(0,0,0);
+//     energy = 0;
+//     nmerged_hits = 1;
+//     merged_process_name = "None";
+// }
+// W4SensitiveDetector::W4Hit::W4Hit(const W4Hit& other)
+// {
+//     detector_id = other.detector_id;
+//     process_name = other.process_name;
+//     global_time = other.global_time;
+//     stripid_x = other.stripid_x;
+//     stripid_y = other.stripid_y;
+//     position = other.position;
+//     direction = other.direction;
+//     energy = other.energy;
+//     nmerged_hits = other.nmerged_hits;
+//     merged_process_name = other.merged_process_name;
+// }
 
-W4SensitiveDetector::W4Hit::~W4Hit()
-{
-}
+// W4SensitiveDetector::W4Hit::~W4Hit()
+// {
+// }
 
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDetectorID(int id)
-{
-    this->detector_id = id;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetTime(double t)
-{
-    this->global_time = t;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetStripID(int x, int y)
-{
-    this->stripid_x = x; this->stripid_y = y;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetPosition
-(const G4ThreeVector& p)
-{
-    this->position = p;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDirection
-(const G4ThreeVector& v)
-{
-    this->direction = v;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetEnergy
-(double e)
-{
-    this->energy = e;
-    return *this;
-}
-W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetProcessName
-(const std::string& name)
-{
-    this->process_name = name;
-    this->merged_process_name = name;
-    return *this;
-}
-bool W4SensitiveDetector::W4Hit::IsSamePixel
-(const W4SensitiveDetector::W4Hit& other)
-{
-    // std::cout << detector_id << " " << stripid_x << " " << stripid_y << " == " << other.detector_id << " " << other.stripid_x << " " << other.stripid_y << std::endl;
-    // auto is1 = detector_id == other.detector_id;
-    // auto is2 = stripid_x == other.stripid_x;
-    // auto is3 = stripid_y == other.stripid_y;
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDetectorID(int id)
+// {
+//     this->detector_id = id;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetTime(double t)
+// {
+//     this->global_time = t;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetStripID(int x, int y)
+// {
+//     this->stripid_x = x; this->stripid_y = y;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetPosition
+// (const G4ThreeVector& p)
+// {
+//     this->position = p;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetDirection
+// (const G4ThreeVector& v)
+// {
+//     this->direction = v;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetEnergy
+// (double e)
+// {
+//     this->energy = e;
+//     return *this;
+// }
+// W4SensitiveDetector::W4Hit& W4SensitiveDetector::W4Hit::SetProcessName
+// (const std::string& name)
+// {
+//     this->process_name = name;
+//     this->merged_process_name = name;
+//     return *this;
+// }
+// bool W4SensitiveDetector::W4Hit::IsSamePixel
+// (const W4SensitiveDetector::W4Hit& other)
+// {
+//     // std::cout << detector_id << " " << stripid_x << " " << stripid_y << " == " << other.detector_id << " " << other.stripid_x << " " << other.stripid_y << std::endl;
+//     // auto is1 = detector_id == other.detector_id;
+//     // auto is2 = stripid_x == other.stripid_x;
+//     // auto is3 = stripid_y == other.stripid_y;
 
-    // if ( is1 ) cout << "same detid!!!" << endl;
-    // else cout << "not same detid!!!" << endl;
+//     // if ( is1 ) cout << "same detid!!!" << endl;
+//     // else cout << "not same detid!!!" << endl;
 
-    // if ( is2 ) cout << "same x!!!" << endl;
-    // else cout << "not same x!!!"<< endl;
+//     // if ( is2 ) cout << "same x!!!" << endl;
+//     // else cout << "not same x!!!"<< endl;
 
-    // if ( is3 ) cout << "same y!!!" << endl;
-    // else cout << "not same y!!!"<< endl;
+//     // if ( is3 ) cout << "same y!!!" << endl;
+//     // else cout << "not same y!!!"<< endl;
     
-    // return is1 && is2 && is3;
+//     // return is1 && is2 && is3;
     
-    return detector_id == other.detector_id
-        && stripid_x == other.stripid_x
-        && stripid_y == other.stripid_y;
-}
-bool W4SensitiveDetector::W4Hit::IsAdjacentPixel
-(const W4SensitiveDetector::W4Hit& other)
-{
-    if ( detector_id != other.detector_id ) return false;
-    if ( IsSamePixel( other ) == true ) return false;
+//     return detector_id == other.detector_id
+//         && stripid_x == other.stripid_x
+//         && stripid_y == other.stripid_y;
+// }
+// bool W4SensitiveDetector::W4Hit::IsAdjacentPixel
+// (const W4SensitiveDetector::W4Hit& other)
+// {
+//     if ( detector_id != other.detector_id ) return false;
+//     if ( IsSamePixel( other ) == true ) return false;
      
-    auto dx = abs( stripid_x - other.stripid_x );
-    auto dy = abs( stripid_y - other.stripid_y );
+//     auto dx = abs( stripid_x - other.stripid_x );
+//     auto dy = abs( stripid_y - other.stripid_y );
     
-    return ( dx==1 && dy==0 ) || ( dx==0 && dy==1 );
-}
-// void W4SensitiveDetector::W4Hit::MergeSamePixel
-// (const W4SensitiveDetector::W4Hit& other)
-// {
-//     // if ( IsSamePixel(other)==false ) return;
-
-//     G4ThreeVector newpos(0,0,0);
-//     if ( this->energy > other.energy ) newpos = this->position;
-//     else newpos = other.position;
-
-//     SetPosition( newpos );
-//     SetEnergy( this->energy + other.energy );
+//     return ( dx==1 && dy==0 ) || ( dx==0 && dy==1 );
 // }
-// void W4SensitiveDetector::W4Hit::MergeAdjacentPixel
-// (const W4SensitiveDetector::W4Hit& other)
-// {
-//     // if ( IsAdjacentPixel(other)==false ) return;
+// // void W4SensitiveDetector::W4Hit::MergeSamePixel
+// // (const W4SensitiveDetector::W4Hit& other)
+// // {
+// //     // if ( IsSamePixel(other)==false ) return;
+
+// //     G4ThreeVector newpos(0,0,0);
+// //     if ( this->energy > other.energy ) newpos = this->position;
+// //     else newpos = other.position;
+
+// //     SetPosition( newpos );
+// //     SetEnergy( this->energy + other.energy );
+// // }
+// // void W4SensitiveDetector::W4Hit::MergeAdjacentPixel
+// // (const W4SensitiveDetector::W4Hit& other)
+// // {
+// //     // if ( IsAdjacentPixel(other)==false ) return;
     
-//     G4ThreeVector newpos(0,0,0);
+// //     G4ThreeVector newpos(0,0,0);
 
-//     //    if ( mode==0 ) {
-//     if ( this->energy > other.energy ) newpos = this->position;
-//     else newpos = other.position;
-//     //}
+// //     //    if ( mode==0 ) {
+// //     if ( this->energy > other.energy ) newpos = this->position;
+// //     else newpos = other.position;
+// //     //}
 
-//     SetPosition( newpos );
-//     SetEnergy( this->energy + other.energy );
+// //     SetPosition( newpos );
+// //     SetEnergy( this->energy + other.energy );
+// // }
+
+// W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnEdepMax
+// (const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
+// {
+//     auto merged = hit1;
+
+//     merged.SetTime( hit1.global_time );
+    
+//     if ( hit1.energy < hit2.energy ) merged.SetPosition( hit2.position );
+//     else merged.SetPosition( hit1.position );
+    
+//     merged.SetEnergy( hit1.energy + hit2.energy );
+//     merged.SetDirection( hit2.direction );
+//     merged.SetProcessName( hit1.process_name );
+//     // merged.SetProcessName( hit1.process_name+"+"+hit2.process_name );
+//     // cout << "merge" << endl;
+
+//     merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
+//     merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;
+    
+//     return merged;
 // }
 
-W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnEdepMax
-(const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
-{
-    auto merged = hit1;
+// W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnFirstHit
+// (const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
+// {
+//     auto merged = hit1;    
 
-    merged.SetTime( hit1.global_time );
+//     merged.SetTime( hit1.global_time );
     
-    if ( hit1.energy < hit2.energy ) merged.SetPosition( hit2.position );
-    else merged.SetPosition( hit1.position );
+//     merged.SetEnergy( hit1.energy + hit2.energy );    
+//     merged.SetDirection( hit1.direction );
+//     merged.SetProcessName( hit1.process_name );
+
+//     merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
+//     merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;    
     
-    merged.SetEnergy( hit1.energy + hit2.energy );
-    merged.SetDirection( hit2.direction );
-    merged.SetProcessName( hit1.process_name );
-    // merged.SetProcessName( hit1.process_name+"+"+hit2.process_name );
-    // cout << "merge" << endl;
+//     return merged;
+// }
 
-    merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
-    merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;
+// bool W4SensitiveDetector::W4Hit::ExistSamePixelAmong
+// (const std::vector<W4SensitiveDetector::W4Hit>& hits)
+// {
+//     for ( auto hit : hits ) 
+// 	if ( this->IsSamePixel( hit )==true ) return true;    
+//     return false;
+// }
+
+// bool W4SensitiveDetector::W4Hit::ExistAdjacentPixelAmong
+// (const std::vector<W4SensitiveDetector::W4Hit>& hits)
+// {
+//     for ( auto hit : hits )
+// 	if ( this->IsAdjacentPixel( hit )==true ) return true;
+//     return false;
+// }
+
+// W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeThem
+// (const std::vector<W4SensitiveDetector::W4Hit>& hits,
+//  std::function<W4SensitiveDetector::W4Hit(const W4SensitiveDetector::W4Hit&, const W4SensitiveDetector::W4Hit&)> merging_method)
+// {
+//     W4Hit merged;
     
-    return merged;
-}
+//     if ( hits.empty() ) return merged;        
 
-W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeOnFirstHit
-(const W4SensitiveDetector::W4Hit& hit1, const W4SensitiveDetector::W4Hit& hit2)
-{
-    auto merged = hit1;    
-
-    merged.SetTime( hit1.global_time );
+//     int nhits = static_cast<int>( hits.size() );    
+//     merged = hits[ 0 ];
     
-    merged.SetEnergy( hit1.energy + hit2.energy );    
-    merged.SetDirection( hit1.direction );
-    merged.SetProcessName( hit1.process_name );
-
-    merged.nmerged_hits = hit1.nmerged_hits + hit2.nmerged_hits;
-    merged.merged_process_name = hit1.merged_process_name + "+" + hit2.merged_process_name;    
+//     for ( int ihit=1; ihit<nhits; ++ihit )
+// 	merged = merging_method( hits[ihit], merged );	
     
-    return merged;
-}
-
-bool W4SensitiveDetector::W4Hit::ExistSamePixelAmong
-(const std::vector<W4SensitiveDetector::W4Hit>& hits)
-{
-    for ( auto hit : hits ) 
-	if ( this->IsSamePixel( hit )==true ) return true;    
-    return false;
-}
-
-bool W4SensitiveDetector::W4Hit::ExistAdjacentPixelAmong
-(const std::vector<W4SensitiveDetector::W4Hit>& hits)
-{
-    for ( auto hit : hits )
-	if ( this->IsAdjacentPixel( hit )==true ) return true;
-    return false;
-}
-
-W4SensitiveDetector::W4Hit W4SensitiveDetector::W4Hit::MergeThem
-(const std::vector<W4SensitiveDetector::W4Hit>& hits,
- std::function<W4SensitiveDetector::W4Hit(const W4SensitiveDetector::W4Hit&, const W4SensitiveDetector::W4Hit&)> merging_method)
-{
-    W4Hit merged;
-    
-    if ( hits.empty() ) return merged;        
-
-    int nhits = static_cast<int>( hits.size() );    
-    merged = hits[ 0 ];
-    
-    for ( int ihit=1; ihit<nhits; ++ihit )
-	merged = merging_method( hits[ihit], merged );	
-    
-    return merged;
-}
+//     return merged;
+// }

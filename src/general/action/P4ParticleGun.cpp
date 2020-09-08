@@ -64,7 +64,7 @@ void P4ParticleGun::apply_parameters()
 {
     verbose_level = std::get<0>( GetParameter<int>("verbose_level") );
     is_applied_parameters = true;
-
+    
     auto [ particle ] = GetParameter<std::string>("particle");
     auto [ use_ion  ] = GetParameter<bool>("use_ion");
     auto [ use_ionL ] = GetParameter<bool>("use_ionL");
@@ -76,7 +76,8 @@ void P4ParticleGun::apply_parameters()
     else {
 	auto table = G4ParticleTable::GetParticleTable();
 	auto particle_def = table->FindParticle( particle.c_str() );
-	if ( particle_def!=nullptr ) SetParticleDefinition( particle_def );
+	if ( particle_def!=nullptr )
+	    SetParticleDefinition( particle_def );
     }
     
     auto [ dx, dy, dz ] = GetParameter<double,double,double>("direction");
@@ -110,7 +111,6 @@ void P4ParticleGun::apply_parameters()
 	auto [ num ] = GetParameter<int>("number");
 	SetNumberOfParticles( num );
     }
-
 }
 
 void P4ParticleGun::ion_command()
