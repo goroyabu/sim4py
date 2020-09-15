@@ -122,6 +122,7 @@ void W4DoublesidedStripDetector::Construct
 	auto sd = new W4SensitiveDetector( "mySensitiveDetector"+idname );
 	sd->SetParameter<bool>("merge_same_pixel", merge_same_pixel);
 	sd->SetParameter<bool>("merge_adjacent_pixel", merge_adjacent_pixel);
+	sd->SetParameter<int>("verbose_level", parameter.verbose_level);
 	sd->SetGridXaxis( 128, pos.x()-size_det, pos.x()+size_det );
 	sd->SetGridYaxis( 128, pos.y()-size_det, pos.y()+size_det );
 	sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );

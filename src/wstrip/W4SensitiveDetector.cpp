@@ -60,7 +60,11 @@ W4SensitiveDetector::W4SensitiveDetector( G4String name )
     DefineParameter<bool>("merge_same_pixel", is_merge_same_pixel);
     DefineParameter<bool>("merge_adjacent_pixel", is_merge_adjacent_pixel);
 
+    verbose_level = 0;
+    DefineParameter<int>("verbose_level", verbose_level);
+    
     is_applied_parameters = false;
+    
 }
 
 W4SensitiveDetector::~W4SensitiveDetector()
@@ -144,6 +148,13 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
     hit->SetPixelCenter( x, y, z );
     dsd_hits_collection->insert( hit );
 
+    if ( verbose_level>2 ) {
+	cout << "W4SensitiveDetector::ProcessHits : ";
+	cout << "detid=" << GetDetectorID() << ", material=" << GetDetectorMaterial();
+	cout << ", proc=" << process_name << ", strip=" << strip_x << "," << strip_y;
+	cout << ", edep=" << edep/CLHEP::keV << endl;	
+    }
+    
     return true;
 }
 
@@ -250,9 +261,9 @@ std::tuple<G4int, G4int, G4int> W4SensitiveDetector::GetStripID
 std::tuple<G4double, G4double, G4double> W4SensitiveDetector::GetCenterOfPixel
 ( G4int strip_x, G4int strip_y, G4int strip_z )
 {
-    auto x = grid_xaxis->GetBinCenter( strip_x );
-    auto y = grid_yaxis->GetBinCenter( strip_y );
-    auto z = grid_zaxis->GetBinCenter( strip_z );
+    auto x = grid_xaxis->GetBinCenter( strip_x+1 );
+    auto y = grid_yaxis->GetBinCenter( strip_y+1 );
+    auto z = grid_zaxis->GetBinCenter( strip_z+1 );
     return std::make_tuple(x, y, z);
 }
 
@@ -285,7 +296,10 @@ void W4SensitiveDetector::ApplyParameters()
 
     auto [ adja ] = GetParameter<bool>("merge_adjacent_pixel");
     is_merge_adjacent_pixel = adja;
- 
+
+    auto [ ver ] = GetParameter<int>("verbose_level");
+    verbose_level = ver;
+    
     is_applied_parameters = true;
 }
 

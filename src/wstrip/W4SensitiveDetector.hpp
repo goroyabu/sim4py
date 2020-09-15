@@ -153,7 +153,7 @@ private:
     bool is_applied_parameters;
     bool is_merge_same_pixel;
     bool is_merge_adjacent_pixel;
-    
+    int  verbose_level;
 };
 
 #endif

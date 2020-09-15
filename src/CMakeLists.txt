@@ -43,6 +43,7 @@ set( files_wstrip
   wstrip/GeometryCollimatorMINE1.cpp
   wstrip/W4DoublesidedStripDetector.cpp
   wstrip/W4HitsCollection.cpp
+  wstrip/W4AirContainBox.cpp
   )
 
 set( files_detector
@@ -66,6 +67,7 @@ set ( header_files
   wstrip/W4EmStandardPhysicsSwitchingDoppler.hpp
   wstrip/W4DoublesidedStripDetector.hpp
   wstrip/W4DetectorConstruction.hpp
+  wstrip/W4AirContainBox.hpp
   clhep/ConstantDefinition.hpp
   clhep/clhep-py.hpp
   general/analysis/P4RootAnalysisManager.hpp

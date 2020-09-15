@@ -20,6 +20,7 @@
 #include "GeometryCollimatorMINE1.hpp"
 
 #include "W4DoublesidedStripDetector.hpp"
+#include "W4AirContainBox.hpp"
 
 namespace wstrip_py
 {    
@@ -80,6 +81,11 @@ namespace wstrip_py
 	    .def("AddDetectorLayer", pybind11::overload_cast<const std::string&, double>(&W4DoublesidedStripDetector::AddDetectorLayer) );
 	sim4py::define_common_method( dsd );
 	sim4py::define_as_singleton( dsd );
+
+	auto air_box = pybind11::class_<W4AirContainBox, P4PVConstruct, ParameterGene>
+	    ( sub, "W4AirContainBox", pybind11::module_local() );
+	sim4py::define_common_method( air_box );
+	sim4py::define_as_singleton( air_box );
 	
 	// .def(pybind11::init( [](){ return nullptr; }))
 	// .def_static("Instance", &W4RunAction::Instance, pybind11::return_value_policy::reference);	
