@@ -52,12 +52,16 @@ W4DoublesidedStripDetector::W4DoublesidedStripDetector()
     DefineParameter<double,unit>("detector_gap", 4, sim4py::mm);
     
     DefineParameter<double,double,double,unit>
-	("detector_center", 0, 0, 0, sim4py::mm);
+	( "detector_center", 0, 0, 0, sim4py::mm );
     DefineParameter<double,double,double>
-	("detector_normal", 0, 0, 1);
+	( "detector_normal", 0, 0, 1 );
     
-    DefineParameter<bool>("merge_same_pixel", true);
-    DefineParameter<bool>("merge_adjacent_pixel", true);       
+    DefineParameter<bool>( "merge_same_pixel",     true );
+    DefineParameter<bool>( "merge_adjacent_pixel", true );
+
+    DefineParameter<double,unit>( "board_size", 52, sim4py::mm );
+    DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );
+    
 }
 
 W4DoublesidedStripDetector::~W4DoublesidedStripDetector()
@@ -93,6 +97,10 @@ void W4DoublesidedStripDetector::Construct
     if ( ndet>0 && parameter.verbose_level>0 )
 	cout << "===== Construct Geometry =====" << endl;       
 
+    auto board_material  = nist_manager->FindOrBuildMaterial( "SiO2" );
+    auto board_size      = parameter.board_size*0.5;
+    auto board_thickness = parameter.board_thickness*0.5;
+    
     for ( auto layer : layers_info ) {
 
 	auto detector_id = layer.detector_id;
@@ -114,9 +122,16 @@ void W4DoublesidedStripDetector::Construct
 	auto box = new G4Box( "BoxDSD", size_det, size_det, thick );
 	auto log = new G4LogicalVolume( box, mate, "LogicalDSD"+idname );
 	auto pos = parameter.detector_center
-	    + G4ThreeVector( 0, 0, -detector_id*gap_det );
-	
+	    + G4ThreeVector( 0, 0, -detector_id*gap_det );	
 	new G4PVPlacement( 0, pos, log, "PhysicalDSD"+idname,
+			   logical_world, false, 0 );
+
+	auto solid_board =
+	    new G4Box( "solid_board", board_size, board_size, board_thickness );
+	auto log_board = new G4LogicalVolume( solid_board, board_material,
+						  "logical_board"+idname );
+	auto pos_board = pos + G4ThreeVector( 0, 0, +1*(thick+board_thickness) );
+	new G4PVPlacement( 0, pos_board, log_board, "phys_board"+idname,
 			   logical_world, false, 0 );
 	
 	auto sd = new W4SensitiveDetector( "mySensitiveDetector"+idname );
@@ -161,6 +176,13 @@ void W4DoublesidedStripDetector::PrepareMaterials()
     if ( !nist_manager->FindOrBuildMaterial("Si") ) {
 	new G4Material("Si", 14., 28.09*g/mole, 2.330*g/cm3);
     }
+    if ( !nist_manager->FindOrBuildMaterial("SiO2") ) {
+	G4Element* O  = new G4Element("Oxygen",  "O",  8.0,  16.00*g/mole );
+	G4Element* Si = new G4Element("Silicon", "Si", 14.0, 28.09*g/mole );
+	G4Material* SiO2 = new G4Material("SiO2", 2.200*g/cm3, 2);
+	SiO2->AddElement(Si, 1);
+	SiO2->AddElement(O , 2);
+    }    
 
     if ( parameter.verbose_level>1 ) 
 	cout << *(G4Material::GetMaterialTable()) << endl;
@@ -233,4 +255,12 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
     
     auto [ adja_pix ] = module->GetParameter<bool>("merge_adjacent_pixel");
     this->is_enabled_merge_adjacent_pixel = adja_pix;
+
+    auto [ bsize, u_bsize ] = module->GetParameter<double,unit>("board_size");
+    this->board_size = bsize*u_bsize;
+    
+    auto [ bthic, u_bthic ]
+	= module->GetParameter<double,unit>("board_thickness");
+    this->board_thickness = bthic*u_bthic;
+    
 }

@@ -72,6 +72,9 @@ private:
 	
 	void ApplyParameters(sim4py::ParameterGene* module);
 	bool is_already_applied;
+
+	double board_size;
+	double board_thickness;
 	
     } parameter;
     
