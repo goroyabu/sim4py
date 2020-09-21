@@ -59,9 +59,10 @@ W4DoublesidedStripDetector::W4DoublesidedStripDetector()
     DefineParameter<bool>( "merge_same_pixel",     true );
     DefineParameter<bool>( "merge_adjacent_pixel", true );
 
+    DefineParameter<bool>( "use_detector_board", true );
+    DefineParameter<std::string>( "board_material", "SiO2" );
     DefineParameter<double,unit>( "board_size", 52, sim4py::mm );
-    DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );
-    
+    DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );    
 }
 
 W4DoublesidedStripDetector::~W4DoublesidedStripDetector()
@@ -97,7 +98,8 @@ void W4DoublesidedStripDetector::Construct
     if ( ndet>0 && parameter.verbose_level>0 )
 	cout << "===== Construct Geometry =====" << endl;       
 
-    auto board_material  = nist_manager->FindOrBuildMaterial( "SiO2" );
+    auto board_material
+	= nist_manager->FindOrBuildMaterial( parameter.board_material );
     auto board_size      = parameter.board_size*0.5;
     auto board_thickness = parameter.board_thickness*0.5;
     
@@ -112,10 +114,24 @@ void W4DoublesidedStripDetector::Construct
 	auto mate = nist_manager->FindOrBuildMaterial( matename );
 
 	if ( parameter.verbose_level>0 ) {
-	    cout << "  DETID     : " << user_detector_id << std::right << std::setw(5);
+
+	    cout << "### Detector ";
+	    cout << user_detector_id << std::right << std::setw(5) << "###";
+	    // cout << "  DETID     : " << user_detector_id << std::right << std::setw(5);
 	    cout << endl;
+	    cout << "  Size      : " << size_det*2.0 << std::setw(5) << "mm\n";
 	    cout << "  Material  : " << matename << std::setw(10) << endl;
 	    cout << "  Thickness : " << thick << std::setw(5) << " mm " << endl;
+	    
+	    if ( parameter.is_enabled_board ) {
+		cout << "  - Board Info" << endl;
+		cout << "    Material  : " << parameter.board_material << endl;
+		cout << "    Size      : " << parameter.board_size << " mm\n";
+		cout << "    Thickness : " << parameter.board_thickness << "mm\n"; 
+	    }
+	    else
+		cout << "  Without Board" << endl;
+
 	    cout << endl;
 	}
 	
@@ -126,13 +142,16 @@ void W4DoublesidedStripDetector::Construct
 	new G4PVPlacement( 0, pos, log, "PhysicalDSD"+idname,
 			   logical_world, false, 0 );
 
-	auto solid_board =
-	    new G4Box( "solid_board", board_size, board_size, board_thickness );
-	auto log_board = new G4LogicalVolume( solid_board, board_material,
+	if ( parameter.is_enabled_board ) {
+	    auto solid_board = new G4Box( "solid_board", board_size, board_size,
+					  board_thickness );
+	    auto log_board = new G4LogicalVolume( solid_board, board_material,
 						  "logical_board"+idname );
-	auto pos_board = pos + G4ThreeVector( 0, 0, +1*(thick+board_thickness) );
-	new G4PVPlacement( 0, pos_board, log_board, "phys_board"+idname,
-			   logical_world, false, 0 );
+	    auto pos_board = pos + G4ThreeVector( 0, 0,
+						  +1*(thick+board_thickness) );	
+	    new G4PVPlacement( 0, pos_board, log_board, "phys_board"+idname,
+			       logical_world, false, 0 );
+	}
 	
 	auto sd = new W4SensitiveDetector( "mySensitiveDetector"+idname );
 	sd->SetParameter<bool>("merge_same_pixel", merge_same_pixel);
@@ -166,22 +185,27 @@ void W4DoublesidedStripDetector::Construct
 void W4DoublesidedStripDetector::PrepareMaterials()
 {
     G4NistManager * nist_manager = G4NistManager::Instance();
-    if ( !nist_manager->FindOrBuildMaterial("CdTe") ) {
-	auto Cd = new G4Element("Cadmium",   "Cd", 48., 112.41*g/mole);
-	auto Te = new G4Element("Tellurium", "Te", 52., 127.60*g/mole);
-	auto CdTe = new G4Material("CdTe", 5.85*g/cm3, 2);
-	CdTe->AddElement(Cd, 1);
-	CdTe->AddElement(Te, 1);
+
+    if ( !nist_manager->FindOrBuildMaterial( "Si" ) ) 
+	new G4Material( "Si", 14., 28.09*g/mole, 2.330*g/cm3 );    
+    if ( !nist_manager->FindOrBuildMaterial( "Cu" ) ) 
+	new G4Material( "Cu", 29., 63.55*g/mole, 8.960*g/cm3 );    
+    if ( !nist_manager->FindOrBuildMaterial( "Al" ) ) 
+	new G4Material( "Al", 13., 26.98*g/mole, 2.7*g/cm3 );
+    
+    if ( !nist_manager->FindOrBuildMaterial( "CdTe" ) ) {
+	auto Cd = new G4Element( "Cadmium",   "Cd", 48., 112.41*g/mole );
+	auto Te = new G4Element( "Tellurium", "Te", 52., 127.60*g/mole );
+	auto CdTe = new G4Material( "CdTe", 5.85*g/cm3, 2 );
+	CdTe->AddElement( Cd, 1 );
+	CdTe->AddElement( Te, 1 );
     }
-    if ( !nist_manager->FindOrBuildMaterial("Si") ) {
-	new G4Material("Si", 14., 28.09*g/mole, 2.330*g/cm3);
-    }
-    if ( !nist_manager->FindOrBuildMaterial("SiO2") ) {
-	G4Element* O  = new G4Element("Oxygen",  "O",  8.0,  16.00*g/mole );
-	G4Element* Si = new G4Element("Silicon", "Si", 14.0, 28.09*g/mole );
-	G4Material* SiO2 = new G4Material("SiO2", 2.200*g/cm3, 2);
-	SiO2->AddElement(Si, 1);
-	SiO2->AddElement(O , 2);
+    if ( !nist_manager->FindOrBuildMaterial( "SiO2" ) ) {
+	G4Element* O  = new G4Element( "Oxygen",  "O",  8.0,  16.00*g/mole );
+	G4Element* Si = new G4Element( "Silicon", "Si", 14.0, 28.09*g/mole );
+	G4Material* SiO2 = new G4Material( "SiO2", 2.200*g/cm3, 2 );
+	SiO2->AddElement( Si, 1 );
+	SiO2->AddElement( O , 2 );
     }    
 
     if ( parameter.verbose_level>1 ) 
@@ -228,13 +252,11 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
     
     // auto [ wld_mate ] = module->GetParameter<std::string>("world_material");
     // this->world_material = wld_mate;
-
     // auto [ wsize, wsizeu ] = module->GetParameter<double,unit>("world_size");
     // this->world_size = wsize*wsizeu;
-
-    auto [ wx, wy, wz, wu ]
-    	= module->GetParameter<double,double,double,unit>("world_center");
-    this->world_center = G4ThreeVector( wx*wu, wy*wu, wz*wu );
+    // auto [ wx, wy, wz, wu ]
+    // 	= module->GetParameter<double,double,double,unit>("world_center");
+    // this->world_center = G4ThreeVector( wx*wu, wy*wu, wz*wu );
 
     auto [ dsize, dunit ] = module->GetParameter<double,unit>("detector_size");
     this->detector_size = dsize*dunit;
@@ -256,6 +278,14 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
     auto [ adja_pix ] = module->GetParameter<bool>("merge_adjacent_pixel");
     this->is_enabled_merge_adjacent_pixel = adja_pix;
 
+    auto [ use_board ] = module->GetParameter<bool>("use_detector_board");
+    this->is_enabled_board = use_board;
+    
+    auto [ bo_mate ] = module->GetParameter<std::string>("board_material");
+    if ( bo_mate=="Aluminum" ) bo_mate = "Al";
+    else if ( bo_mate=="Copper" ) bo_mate = "Cu";
+    this->board_material = bo_mate;
+    
     auto [ bsize, u_bsize ] = module->GetParameter<double,unit>("board_size");
     this->board_size = bsize*u_bsize;
     

@@ -1,4 +1,4 @@
-/**
+ /**
    @file    W4DoublesidedStripDetector.hpp
    @author  Goro Yabu
    @date    2019/12/22
@@ -57,9 +57,9 @@ private:
     {
 	int verbose_level;
 	
-	std::string world_material;
-	double world_size;
-	G4ThreeVector world_center;
+	// std::string world_material;
+	// double world_size;
+	// G4ThreeVector world_center;
 
 	double detector_size;
 	double detector_gap;
@@ -73,6 +73,8 @@ private:
 	void ApplyParameters(sim4py::ParameterGene* module);
 	bool is_already_applied;
 
+	bool is_enabled_board;
+	std::string board_material;
 	double board_size;
 	double board_thickness;
 	
