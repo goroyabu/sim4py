@@ -62,7 +62,10 @@ W4DoublesidedStripDetector::W4DoublesidedStripDetector()
     DefineParameter<bool>( "use_detector_board", true );
     DefineParameter<std::string>( "board_material", "SiO2" );
     DefineParameter<double,unit>( "board_size", 52, sim4py::mm );
-    DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );    
+    DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );
+
+    DefineParameter<int>("npixels_xside", 128 );
+    DefineParameter<int>("npixels_yside", 128 );
 }
 
 W4DoublesidedStripDetector::~W4DoublesidedStripDetector()
@@ -102,6 +105,9 @@ void W4DoublesidedStripDetector::Construct
 	= nist_manager->FindOrBuildMaterial( parameter.board_material );
     auto board_size      = parameter.board_size*0.5;
     auto board_thickness = parameter.board_thickness*0.5;
+
+    auto npixels_xside = parameter.npixels_xside;
+    auto npixels_yside = parameter.npixels_yside;
     
     for ( auto layer : layers_info ) {
 
@@ -117,7 +123,7 @@ void W4DoublesidedStripDetector::Construct
 
 	    cout << "### Detector ";
 	    cout << user_detector_id << std::right << std::setw(5) << "###";
-	    // cout << "  DETID     : " << user_detector_id << std::right << std::setw(5);
+
 	    cout << endl;
 	    cout << "  Size      : " << size_det*2.0 << std::setw(5) << "mm\n";
 	    cout << "  Material  : " << matename << std::setw(10) << endl;
@@ -157,8 +163,8 @@ void W4DoublesidedStripDetector::Construct
 	sd->SetParameter<bool>("merge_same_pixel", merge_same_pixel);
 	sd->SetParameter<bool>("merge_adjacent_pixel", merge_adjacent_pixel);
 	sd->SetParameter<int>("verbose_level", parameter.verbose_level);
-	sd->SetGridXaxis( 128, pos.x()-size_det, pos.x()+size_det );
-	sd->SetGridYaxis( 128, pos.y()-size_det, pos.y()+size_det );
+	sd->SetGridXaxis( npixels_xside, pos.x()-size_det, pos.x()+size_det );
+	sd->SetGridYaxis( npixels_yside, pos.y()-size_det, pos.y()+size_det );
 	sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );
 	sd->SetDetectorID( user_detector_id );
 
@@ -292,5 +298,10 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
     auto [ bthic, u_bthic ]
 	= module->GetParameter<double,unit>("board_thickness");
     this->board_thickness = bthic*u_bthic;
-    
+
+    auto [ npixx ] = module->GetParameter<int>("npixels_xside");
+    this->npixels_xside = npixx;
+
+    auto [ npixy ] = module->GetParameter<int>("npixels_yside");
+    this->npixels_yside = npixy;
 }

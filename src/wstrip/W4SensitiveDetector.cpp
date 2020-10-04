@@ -36,10 +36,8 @@ W4SensitiveDetector::W4SensitiveDetector( G4String name )
       G4VSensitiveDetector(name)
 {
     collectionName.insert( name+"_hc" );
-    // collectionName.insert( "stacked_dsd_hc" );
     
     dsd_hits_collection = nullptr;
-    // hits_collection = nullptr;
 
     detector_id = 0;
     detector_material = 0;

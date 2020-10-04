@@ -77,6 +77,9 @@ private:
 	std::string board_material;
 	double board_size;
 	double board_thickness;
+
+	int npixels_xside;
+	int npixels_yside;
 	
     } parameter;
     
