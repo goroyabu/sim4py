@@ -50,6 +50,8 @@ W4DoublesidedStripDetector::W4DoublesidedStripDetector()
 
     DefineParameter<double,unit>("detector_size", 32, sim4py::mm);
     DefineParameter<double,unit>("detector_gap", 4, sim4py::mm);
+    DefineParameter<double,unit>("gap_of_abso_and_scat", -1, sim4py::mm);
+    DefineParameter<int>("detid_max_of_scatterer", 1);
     
     DefineParameter<double,double,double,unit>
 	( "detector_center", 0, 0, 0, sim4py::mm );
@@ -90,8 +92,11 @@ void W4DoublesidedStripDetector::Construct
     /* Definition of Detector */
     auto size_det    = parameter.detector_size*0.5;
     auto gap_det     = parameter.detector_gap;
+    auto gap_of_abso_and_scat = parameter.gap_of_abso_and_scat;
+    auto detid_max_of_scatterer = parameter.detid_max_of_scatterer;
     if ( parameter.detector_normal == G4ThreeVector(0,0,-1) ) {
 	gap_det = -gap_det;
+	gap_of_abso_and_scat = -gap_of_abso_and_scat;
     }
 
     auto merge_same_pixel     = parameter.is_enabled_merge_same_pixel;
@@ -143,8 +148,13 @@ void W4DoublesidedStripDetector::Construct
 	
 	auto box = new G4Box( "BoxDSD", size_det, size_det, thick );
 	auto log = new G4LogicalVolume( box, mate, "LogicalDSD"+idname );
-	auto pos = parameter.detector_center
-	    + G4ThreeVector( 0, 0, -detector_id*gap_det );	
+
+	auto pos_z = -detector_id*gap_det;
+	if ( detector_id>detid_max_of_scatterer && 0<=detid_max_of_scatterer ) {
+	    pos_z = -(detector_id-1)*gap_det - gap_of_abso_and_scat;
+	}
+	
+	auto pos = parameter.detector_center + G4ThreeVector( 0, 0, pos_z );	
 	new G4PVPlacement( 0, pos, log, "PhysicalDSD"+idname,
 			   logical_world, false, 0 );
 
@@ -269,6 +279,16 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
 
     auto [ dgap, dgunit ] = module->GetParameter<double,unit>("detector_gap");
     this->detector_gap = dgap*dgunit;
+
+    auto [ gapas, gasunit ]
+	= module->GetParameter<double,unit>("gap_of_abso_and_scat");
+    if ( gapas>0 )
+	this->gap_of_abso_and_scat = gapas*gasunit;
+    else
+	this->gap_of_abso_and_scat = this->detector_gap;
+
+    auto [ dmaxs ] = module->GetParameter<int>("detid_max_of_scatterer");
+    this->detid_max_of_scatterer = dmaxs;
     
     auto [ px, py, pz, pu ]
 	= module->GetParameter<double,double,double,unit>("detector_center");

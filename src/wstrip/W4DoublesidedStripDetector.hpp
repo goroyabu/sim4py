@@ -63,6 +63,8 @@ private:
 
 	double detector_size;
 	double detector_gap;
+	double gap_of_abso_and_scat;
+	int detid_max_of_scatterer;
 	
 	G4ThreeVector detector_center;
 	G4ThreeVector detector_normal;
