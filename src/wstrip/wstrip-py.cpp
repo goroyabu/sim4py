@@ -78,7 +78,9 @@ namespace wstrip_py
 
 	auto dsd = pybind11::class_<W4DoublesidedStripDetector, P4PVConstruct, ParameterGene>
 	    ( sub, "W4DoublesidedStripDetector", pybind11::module_local() )
-	    .def("AddDetectorLayer", pybind11::overload_cast<const std::string&, double>(&W4DoublesidedStripDetector::AddDetectorLayer) );
+	    .def("AddDetectorLayer", pybind11::overload_cast<const std::string&, double>(&W4DoublesidedStripDetector::AddDetectorLayer) )
+	    .def("SetCurrentLayerSize", &W4DoublesidedStripDetector::SetCurrentLayerSize)
+	    .def("SetCurrentLayerPixels", &W4DoublesidedStripDetector::SetCurrentLayerPixels);
 	sim4py::define_common_method( dsd );
 	sim4py::define_as_singleton( dsd );
 

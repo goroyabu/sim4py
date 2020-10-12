@@ -30,11 +30,40 @@ public:
     (const std::string& material, double thickness);
     W4DoublesidedStripDetector* AddDetectorLayer
     (int user_detector_id, const std::string& material, double thickness);
+
+    W4DoublesidedStripDetector* SetCurrentLayerSize
+    (double xlength, double ylength);
+    W4DoublesidedStripDetector* SetCurrentLayerPosition
+    (double x, double y, double z);
+    W4DoublesidedStripDetector* SetCurrentLayerNormal
+    (double x, double y, double z);    
+    W4DoublesidedStripDetector* SetCurrentLayerPixels
+    (int xpixels, int ypixels, int zpixels=-1);
     
 private:
 
     struct layer_info
     {
+	layer_info()
+	{
+	    detector_id = -1;
+	    user_detector_id = -1;
+	    material = -1;
+	    thickness = -1;
+	    
+	    xlength = -1;
+	    ylength = -1;
+
+	    position = G4ThreeVector( 0, 0, 0 );
+	    normal = G4ThreeVector( 0, 0, 0 );
+
+	    xpixels = -1;
+	    ypixels = -1;
+	    zpixels = -1;
+	    merge_same_pixel = false;
+	    merge_adjacent_pixel = false;
+	}   
+	
 	/* ID */
 	int detector_id;
 	int user_detector_id;		
@@ -42,6 +71,7 @@ private:
 	/* physical info */
 	G4String material;       
 	double xlength, ylength;
+	double board_margin;
 	double thickness;
 	G4ThreeVector position;
 	G4ThreeVector normal;
@@ -79,6 +109,7 @@ private:
 	std::string board_material;
 	double board_size;
 	double board_thickness;
+	double board_margin;
 
 	int npixels_xside;
 	int npixels_yside;

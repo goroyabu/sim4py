@@ -65,6 +65,7 @@ W4DoublesidedStripDetector::W4DoublesidedStripDetector()
     DefineParameter<std::string>( "board_material", "SiO2" );
     DefineParameter<double,unit>( "board_size", 52, sim4py::mm );
     DefineParameter<double,unit>( "board_thickness", 1.0, sim4py::mm );
+    DefineParameter<double,unit>( "board_margin", 10, sim4py::mm );
 
     DefineParameter<int>("npixels_xside", 128 );
     DefineParameter<int>("npixels_yside", 128 );
@@ -108,8 +109,9 @@ void W4DoublesidedStripDetector::Construct
 
     auto board_material
 	= nist_manager->FindOrBuildMaterial( parameter.board_material );
-    auto board_size      = parameter.board_size*0.5;
+    // auto board_size      = parameter.board_size*0.5;
     auto board_thickness = parameter.board_thickness*0.5;
+    auto board_margin    = parameter.board_margin;
 
     auto npixels_xside = parameter.npixels_xside;
     auto npixels_yside = parameter.npixels_yside;
@@ -124,29 +126,50 @@ void W4DoublesidedStripDetector::Construct
 	
 	auto mate = nist_manager->FindOrBuildMaterial( matename );
 
-	if ( parameter.verbose_level>0 ) {
+	auto xlength = layer.xlength*0.5;
+	auto ylength = layer.ylength*0.5;
+	// auto position = layer.position;
+	// auto normal = layer.normal;
+	auto xpixels = layer.xpixels;
+	auto ypixels = layer.ypixels;
+	auto zpixels = layer.zpixels;
 
+	auto board_xlengh = xlength + board_margin;
+	auto board_ylengh = ylength + board_margin;
+	
+	if ( xlength<0 ) xlength = size_det;
+	if ( ylength<0 ) ylength = size_det;
+	if ( xpixels<0 ) xpixels = npixels_xside;
+	if ( ypixels<0 ) ypixels = npixels_yside;
+	if ( ypixels<0 ) zpixels = 1;
+	
+	if ( parameter.verbose_level>0 ) {
+	    
 	    cout << "### Detector ";
 	    cout << user_detector_id << std::right << std::setw(5) << "###";
 
 	    cout << endl;
-	    cout << "  Size      : " << size_det*2.0 << std::setw(5) << "mm\n";
+	    // cout << "  Size      : " << size_det*2.0 << std::setw(5) << "mm\n";
+	    cout << "  Size(X,Y) : " << xlength*2 << "," << ylength*2 << "mm\n"; 
 	    cout << "  Material  : " << matename << std::setw(10) << endl;
 	    cout << "  Thickness : " << thick << std::setw(5) << " mm " << endl;
 	    
 	    if ( parameter.is_enabled_board ) {
 		cout << "  - Board Info" << endl;
 		cout << "    Material  : " << parameter.board_material << endl;
-		cout << "    Size      : " << parameter.board_size << " mm\n";
-		cout << "    Thickness : " << parameter.board_thickness << "mm\n"; 
+		// cout << "    Size      : " << parameter.board_size << " mm\n";
+		cout << "  Size(X,Y) : " << board_xlengh*2 << ",";
+		cout << board_ylengh*2 << "mm\n"; 
+		cout << "    Thickness : " << parameter.board_thickness << "mm\n";
 	    }
 	    else
 		cout << "  Without Board" << endl;
-
+	    
 	    cout << endl;
 	}
 	
-	auto box = new G4Box( "BoxDSD", size_det, size_det, thick );
+	// auto box = new G4Box( "BoxDSD", size_det, size_det, thick );
+	auto box = new G4Box( "BoxDSD", xlength, ylength, thick );
 	auto log = new G4LogicalVolume( box, mate, "LogicalDSD"+idname );
 
 	auto pos_z = -detector_id*gap_det;
@@ -159,8 +182,10 @@ void W4DoublesidedStripDetector::Construct
 			   logical_world, false, 0 );
 
 	if ( parameter.is_enabled_board ) {
-	    auto solid_board = new G4Box( "solid_board", board_size, board_size,
-					  board_thickness );
+	    // auto solid_board = new G4Box( "solid_board", board_size, board_size,
+	    // 				  board_thickness );
+	    auto solid_board = new G4Box( "solid_board", board_xlengh, board_ylengh,
+					  board_thickness );	    
 	    auto log_board = new G4LogicalVolume( solid_board, board_material,
 						  "logical_board"+idname );
 	    auto pos_board = pos + G4ThreeVector( 0, 0,
@@ -173,9 +198,12 @@ void W4DoublesidedStripDetector::Construct
 	sd->SetParameter<bool>("merge_same_pixel", merge_same_pixel);
 	sd->SetParameter<bool>("merge_adjacent_pixel", merge_adjacent_pixel);
 	sd->SetParameter<int>("verbose_level", parameter.verbose_level);
-	sd->SetGridXaxis( npixels_xside, pos.x()-size_det, pos.x()+size_det );
-	sd->SetGridYaxis( npixels_yside, pos.y()-size_det, pos.y()+size_det );
-	sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );
+	// sd->SetGridXaxis( npixels_xside, pos.x()-size_det, pos.x()+size_det );
+	// sd->SetGridYaxis( npixels_yside, pos.y()-size_det, pos.y()+size_det );
+	// sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );
+	sd->SetGridXaxis( xpixels, pos.x()-size_det, pos.x()+size_det );
+	sd->SetGridYaxis( ypixels, pos.y()-size_det, pos.y()+size_det );
+	sd->SetGridZaxis( zpixels, pos.z()-thick,    pos.z()+thick    );
 	sd->SetDetectorID( user_detector_id );
 
 	if ( matename=="Si" )
@@ -255,6 +283,46 @@ W4DoublesidedStripDetector* W4DoublesidedStripDetector::AddDetectorLayer(int use
     return this;
 }
 
+W4DoublesidedStripDetector* W4DoublesidedStripDetector::SetCurrentLayerSize
+(double xlength, double ylength)
+{
+    if ( layers_info.size()==0 ) return this;
+    if ( xlength>0 )
+	layers_info[ layers_info.size()-1 ].xlength = xlength;
+    if ( ylength>0 )
+	layers_info[ layers_info.size()-1 ].ylength = ylength;
+    return this;
+}
+
+W4DoublesidedStripDetector* W4DoublesidedStripDetector::SetCurrentLayerPosition
+(double x, double y, double z)
+{
+    if ( layers_info.size()==0 ) return this;
+    layers_info[ layers_info.size()-1 ].position = G4ThreeVector( x, y, z );
+    return this;
+}
+
+W4DoublesidedStripDetector* W4DoublesidedStripDetector::SetCurrentLayerNormal
+(double x, double y, double z)
+{
+    if ( layers_info.size()==0 ) return this;
+    layers_info[ layers_info.size()-1 ].normal = G4ThreeVector( x, y, z );
+    return this;
+}
+
+W4DoublesidedStripDetector* W4DoublesidedStripDetector::SetCurrentLayerPixels
+(int xpixels, int ypixels, int zpixels)
+{
+    if ( layers_info.size()==0 ) return this;
+    if ( xpixels>0 )
+	layers_info[ layers_info.size()-1 ].xpixels = xpixels;
+    if ( ypixels>0 )
+	layers_info[ layers_info.size()-1 ].ypixels = ypixels;
+    if ( zpixels>0 )
+	layers_info[ layers_info.size()-1 ].zpixels = zpixels;
+    return this;
+}
+
 void W4DoublesidedStripDetector::parameters_list::ApplyParameters
 (sim4py::ParameterGene* module)
 {
@@ -319,6 +387,9 @@ void W4DoublesidedStripDetector::parameters_list::ApplyParameters
 	= module->GetParameter<double,unit>("board_thickness");
     this->board_thickness = bthic*u_bthic;
 
+    auto [ bmargin, u_bmargin ] = module->GetParameter<double,unit>("board_margin");
+    this->board_margin = bmargin*u_bmargin;
+    
     auto [ npixx ] = module->GetParameter<int>("npixels_xside");
     this->npixels_xside = npixx;
 
