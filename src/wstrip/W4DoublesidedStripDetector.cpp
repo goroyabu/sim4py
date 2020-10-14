@@ -134,16 +134,16 @@ void W4DoublesidedStripDetector::Construct
 	auto ypixels = layer.ypixels;
 	auto zpixels = layer.zpixels;
 
-	auto board_xlengh = xlength + board_margin;
-	auto board_ylengh = ylength + board_margin;
-	
 	if ( xlength<0 ) xlength = size_det;
 	if ( ylength<0 ) ylength = size_det;
 	if ( xpixels<0 ) xpixels = npixels_xside;
 	if ( ypixels<0 ) ypixels = npixels_yside;
-	if ( ypixels<0 ) zpixels = 1;
+	if ( zpixels<0 ) zpixels = 1;
 	
-	if ( parameter.verbose_level>0 ) {
+	auto board_xlengh = xlength + board_margin;
+	auto board_ylengh = ylength + board_margin;
+	
+	if ( parameter.verbose_level>0 || true ) {
 	    
 	    cout << "### Detector ";
 	    cout << user_detector_id << std::right << std::setw(5) << "###";
@@ -152,15 +152,17 @@ void W4DoublesidedStripDetector::Construct
 	    // cout << "  Size      : " << size_det*2.0 << std::setw(5) << "mm\n";
 	    cout << "  Size(X,Y) : " << xlength*2 << "," << ylength*2 << "mm\n"; 
 	    cout << "  Material  : " << matename << std::setw(10) << endl;
-	    cout << "  Thickness : " << thick << std::setw(5) << " mm " << endl;
+	    cout << "  Thickness : " << thick*2 << std::setw(5) << " mm " << endl;
+	    cout << "  Pixels    : " << xpixels << ",";
+	    cout << ypixels << "," << zpixels << endl; 
 	    
 	    if ( parameter.is_enabled_board ) {
 		cout << "  - Board Info" << endl;
 		cout << "    Material  : " << parameter.board_material << endl;
 		// cout << "    Size      : " << parameter.board_size << " mm\n";
-		cout << "  Size(X,Y) : " << board_xlengh*2 << ",";
+		cout << "    Size(X,Y) : " << board_xlengh*2 << ",";
 		cout << board_ylengh*2 << "mm\n"; 
-		cout << "    Thickness : " << parameter.board_thickness << "mm\n";
+		cout << "    Thickness : " << board_thickness*2 << "mm\n";
 	    }
 	    else
 		cout << "  Without Board" << endl;
@@ -201,9 +203,9 @@ void W4DoublesidedStripDetector::Construct
 	// sd->SetGridXaxis( npixels_xside, pos.x()-size_det, pos.x()+size_det );
 	// sd->SetGridYaxis( npixels_yside, pos.y()-size_det, pos.y()+size_det );
 	// sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );
-	sd->SetGridXaxis( xpixels, pos.x()-size_det, pos.x()+size_det );
-	sd->SetGridYaxis( ypixels, pos.y()-size_det, pos.y()+size_det );
-	sd->SetGridZaxis( zpixels, pos.z()-thick,    pos.z()+thick    );
+	sd->SetGridXaxis( xpixels,  pos.x()-xlength,  pos.x()+xlength  );
+	sd->SetGridYaxis( ypixels,  pos.y()-ylength,  pos.y()+ylength  );
+	sd->SetGridZaxis( zpixels,  pos.z()-thick,    pos.z()+thick    );
 	sd->SetDetectorID( user_detector_id );
 
 	if ( matename=="Si" )
