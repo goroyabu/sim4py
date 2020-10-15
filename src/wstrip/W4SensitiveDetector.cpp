@@ -251,7 +251,7 @@ std::tuple<G4int, G4int, G4int> W4SensitiveDetector::GetStripID
 ( const G4ThreeVector& pos )
 {
     auto x = grid_xaxis->FindBin( pos.x() ) - 1;
-    auto y = grid_yaxis->FindBin( pos.y() ) - 1;
+    auto y = grid_yaxis->FindBin( pos.y() ) - 1 + grid_xaxis->GetXaxis()->GetNbins();
     auto z = grid_zaxis->FindBin( pos.z() ) - 1;
     return std::make_tuple(x, y, z);
 }
