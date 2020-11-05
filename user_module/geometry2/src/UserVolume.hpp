@@ -12,11 +12,15 @@ class UserVolume
 {
 
 public:
-
+    
     UserVolume();
-    virtual ~UserVolume(){}
+    virtual ~UserVolume(){}    
     virtual void Construct(G4LogicalVolume*) override;
 
+private:
+
+    int verbose_level;
+    
 };
 
 #endif

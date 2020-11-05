@@ -87,12 +87,26 @@ void W4RunAction::BeginOfRunAction(const G4Run*)
     analysis_manager->CreateNtupleIColumnV( "strip_x", 128 );
     analysis_manager->CreateNtupleIColumnV( "strip_y", 128 );    
     analysis_manager->CreateNtupleDColumnV( "edep",    128 );
+    analysis_manager->CreateNtupleDColumnV( "ekin",    128 );
     analysis_manager->CreateNtupleDColumnV( "pos_x",   128 );
     analysis_manager->CreateNtupleDColumnV( "pos_y",   128 );
     analysis_manager->CreateNtupleDColumnV( "pos_z",   128 );
-    analysis_manager->CreateNtupleDColumnV( "dir_x", 128 );
-    analysis_manager->CreateNtupleDColumnV( "dir_y", 128 );
-    analysis_manager->CreateNtupleDColumnV( "dir_z", 128 );    
+    analysis_manager->CreateNtupleDColumnV( "dir_x",   128 );
+    analysis_manager->CreateNtupleDColumnV( "dir_y",   128 );
+    analysis_manager->CreateNtupleDColumnV( "dir_z",   128 );
+    analysis_manager->CreateNtupleDColumnV( "bgn_x",   128 );
+    analysis_manager->CreateNtupleDColumnV( "bgn_y",   128 );
+    analysis_manager->CreateNtupleDColumnV( "bgn_z",   128 );
+    analysis_manager->CreateNtupleDColumnV( "end_x",  128 );
+    analysis_manager->CreateNtupleDColumnV( "end_y",  128 );
+    analysis_manager->CreateNtupleDColumnV( "end_z",  128 );
+    analysis_manager->CreateNtupleDColumnV( "in_x",    128 );
+    analysis_manager->CreateNtupleDColumnV( "in_y",    128 );
+    analysis_manager->CreateNtupleDColumnV( "in_z",    128 );    
+    analysis_manager->CreateNtupleDColumnV( "out_x",   128 );    
+    analysis_manager->CreateNtupleDColumnV( "out_y",   128 );
+    analysis_manager->CreateNtupleDColumnV( "out_z",   128 );
+    analysis_manager->CreateNtupleDColumnV( "step_length",    128 );
     analysis_manager->CreateNtupleDColumnV( "pixel_center_x", 128 );
     analysis_manager->CreateNtupleDColumnV( "pixel_center_y", 128 );
     analysis_manager->CreateNtupleDColumnV( "pixel_center_z", 128 );
@@ -101,6 +115,7 @@ void W4RunAction::BeginOfRunAction(const G4Run*)
     analysis_manager->CreateNtupleDColumn( "init_y" );
     analysis_manager->CreateNtupleDColumn( "init_z" );
     analysis_manager->CreateNtupleSColumn( "proc_name" );
+    analysis_manager->CreateNtupleSColumn( "part_name" );
     analysis_manager->CreateNtupleIColumnV( "nmerged_raw_hits", 128 );
     // analysis_manager->CreateNtupleSColumn( "raw_proc_name" );    
     

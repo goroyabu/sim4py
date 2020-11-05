@@ -108,18 +108,24 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
     }
     auto global_time = post->GetGlobalTime();
     
-    G4double edep = step->GetTotalEnergyDeposit();
-    G4double length = step->GetStepLength();
+    G4double edep           = step->GetTotalEnergyDeposit();
+    G4double length         = step->GetStepLength();
+    G4String particle_name  = step->GetTrack()->GetParticleDefinition()->GetParticleType();
 
-    G4ThreeVector pos = pre->GetPosition();
-    G4ThreeVector dir = pre->GetMomentumDirection();
+    // G4ThreeVector pos = pre->GetPosition();
+    // G4ThreeVector dir = pre->GetMomentumDirection();
+    G4ThreeVector pre_pos   = pre->GetPosition();    
+    G4ThreeVector pre_dir   = pre->GetMomentumDirection();
+    G4ThreeVector post_pos  = post->GetPosition();
+    G4ThreeVector post_dir  = post->GetMomentumDirection();
+    G4double kinetic_energy = post->GetKineticEnergy();    
 
     // auto touchable = step->GetPreStepPoint()->GetTouchable();
     // auto cell_id   = touchable->GetReplicaNumber(1);
 
     if ( edep <= 0.0 || length <= 0.0 ) return true;
     
-    auto [ strip_x, strip_y, strip_z ] = GetStripID( pos );
+    auto [ strip_x, strip_y, strip_z ] = GetStripID( pre_pos );
     
     // W4Hit hit;
     // hit.SetDetectorID( GetDetectorID() );
@@ -135,11 +141,19 @@ G4bool W4SensitiveDetector::ProcessHits( G4Step* step, G4TouchableHistory* )
     hit->SetDetectorID( GetDetectorID() );
     hit->SetDetectorMaterial( GetDetectorMaterial() );
     hit->SetProcessName( process_name );
+    hit->SetParticleName( particle_name );
     hit->SetTime( global_time/CLHEP::ns );
     hit->SetStripID( strip_x, strip_y );
-    hit->SetPosition( pos/CLHEP::mm );
-    hit->SetDirection( dir/CLHEP::mm );
+    hit->SetPosition( pre_pos/CLHEP::mm );
+    hit->SetDirection( pre_dir/CLHEP::mm );
+    hit->SetPrePosition( pre_pos/CLHEP::mm );
+    hit->SetPreDirection( pre_dir/CLHEP::mm );
+    hit->SetPostPosition( post_pos/CLHEP::mm );
+    hit->SetPostDirection( post_dir/CLHEP::mm );
+    hit->SetStepLength( length/CLHEP::mm );
+
     hit->SetEnergy( edep/CLHEP::keV );
+    hit->SetKineticEnergy( kinetic_energy/CLHEP::keV );
     hit->SetMerge( is_merge_same_pixel, is_merge_adjacent_pixel );
     // auto [ x, y, z ] = GetCenterOfPixel( hit->StripIDX(), hit->StripIDY() );
     auto [ x, y, z ] = GetCenterOfPixel( strip_x, strip_y, strip_z );

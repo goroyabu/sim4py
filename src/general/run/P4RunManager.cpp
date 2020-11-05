@@ -27,6 +27,8 @@ using std::endl;
 #include <G4UImanager.hh>
 #include <G4VisExecutive.hh>
 
+#include <G4EmParameters.hh>
+
 P4RunManager::P4RunManager()
     : sim4py::ParameterGene("P4RunManager"), G4RunManager()
 {
@@ -45,6 +47,9 @@ P4RunManager::P4RunManager()
     DefineParameter<bool>("visualize", false);
 
     DefineParameter<double,sim4py::unit>("cut_value", 1.0, sim4py::mm);
+
+    DefineParameter<double>("dr_over_range", 0.2);
+    DefineParameter<double,sim4py::unit>("final_range", 1.0, sim4py::mm);
     
     ui_executive = nullptr;
     vis_executive = nullptr;
@@ -125,7 +130,13 @@ void P4RunManager::Initialize()
 
     if ( physics_list ) cout << "Phys ok" << endl;
     if ( action_initialization ) cout << "Act ok" << endl;
-    if ( detector_construction ) cout << "Det ok" << endl;	
+    if ( detector_construction ) cout << "Det ok" << endl;	    
+
+    auto [ dr_over_range ] = this->GetParameter<double>("dr_over_range");
+    auto [ final_range, u_fr ]
+	= this->GetParameter<double,sim4py::unit>("final_range");
+    G4EmParameters::Instance()
+	->SetStepFunction( dr_over_range, final_range*u_fr );
     
     this->G4RunManager::Initialize();
 

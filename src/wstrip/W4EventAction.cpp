@@ -100,6 +100,7 @@ void W4EventAction::EndOfEventAction(const G4Event*event)
 
     for ( auto hit : merged_hits ) {
         analysis_manager->FillNtupleDColumnVName( "edep",              hit.Energy() );
+	analysis_manager->FillNtupleDColumnVName( "ekin",              hit.KineticEnergy() );
         analysis_manager->FillNtupleIColumnVName( "detid",             hit.DetectorID() );
 	analysis_manager->FillNtupleIColumnVName( "material",          hit.Material() );
         analysis_manager->FillNtupleDColumnVName( "global_time",       hit.Time() );
@@ -111,8 +112,24 @@ void W4EventAction::EndOfEventAction(const G4Event*event)
         analysis_manager->FillNtupleDColumnVName( "dir_x",             hit.DirX() );
         analysis_manager->FillNtupleDColumnVName( "dir_y",             hit.DirY() );
         analysis_manager->FillNtupleDColumnVName( "dir_z",             hit.DirZ() );
+
+	analysis_manager->FillNtupleDColumnVName( "bgn_x",             hit.PosPreX()  );
+        analysis_manager->FillNtupleDColumnVName( "bgn_y",             hit.PosPreY()  );
+        analysis_manager->FillNtupleDColumnVName( "bgn_z",             hit.PosPreZ()  );
+        analysis_manager->FillNtupleDColumnVName( "end_x",             hit.PosPostX() );
+        analysis_manager->FillNtupleDColumnVName( "end_y",             hit.PosPostY() );
+        analysis_manager->FillNtupleDColumnVName( "end_z",             hit.PosPostZ() );
+	analysis_manager->FillNtupleDColumnVName( "in_x",              hit.DirPreX()  );
+        analysis_manager->FillNtupleDColumnVName( "in_y",              hit.DirPreY()  );
+        analysis_manager->FillNtupleDColumnVName( "in_z",              hit.DirPreZ()  );
+        analysis_manager->FillNtupleDColumnVName( "out_x",             hit.DirPostX() );
+        analysis_manager->FillNtupleDColumnVName( "out_y",             hit.DirPostY() );
+        analysis_manager->FillNtupleDColumnVName( "out_z",             hit.DirPostZ() );
+	analysis_manager->FillNtupleDColumnVName( "step_length",       hit.StepLength());
+	
         analysis_manager->AddNtupleDColumnName  ( "etotal",            hit.Energy() );
         analysis_manager->AddNtupleSColumnName  ( "proc_name",         hit.ProcessName() );
+	analysis_manager->AddNtupleSColumnName  ( "part_name",         hit.ParticleName() );
         // auto [ x, y ] = GetCenterOfPixel( hit.StripIDX(), hit.StripIDY() );
         analysis_manager->FillNtupleDColumnVName( "pixel_center_x",    hit.PixelCenterX() );
         analysis_manager->FillNtupleDColumnVName( "pixel_center_y",    hit.PixelCenterY() );
