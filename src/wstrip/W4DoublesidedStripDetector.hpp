@@ -34,9 +34,9 @@ public:
     W4DoublesidedStripDetector* SetCurrentLayerSize
     (double xlength, double ylength);
     W4DoublesidedStripDetector* SetCurrentLayerPosition
-    (double x, double y, double z);
-    W4DoublesidedStripDetector* SetCurrentLayerNormal
-    (double x, double y, double z);    
+    (double x, double y, double z, sim4py::unit length);
+    W4DoublesidedStripDetector* SetCurrentLayerRotation
+    (double x, double y, double z, sim4py::unit angle);    
     W4DoublesidedStripDetector* SetCurrentLayerPixels
     (int xpixels, int ypixels, int zpixels=-1);
     
@@ -55,7 +55,9 @@ private:
 	    ylength = -1;
 
 	    position = G4ThreeVector( 0, 0, 0 );
-	    normal = G4ThreeVector( 0, 0, 0 );
+	    rotation = G4ThreeVector( 0, 0, 0 );
+	    is_set_position = false;
+	    is_set_rotation = false;
 
 	    xpixels = -1;
 	    ypixels = -1;
@@ -74,7 +76,9 @@ private:
 	double board_margin;
 	double thickness;
 	G4ThreeVector position;
-	G4ThreeVector normal;
+	G4ThreeVector rotation;
+	bool is_set_position;
+	bool is_set_rotation;
 
 	/* pixel info */
 	int xpixels, ypixels, zpixels;
@@ -90,14 +94,15 @@ private:
 	// std::string world_material;
 	// double world_size;
 	// G4ThreeVector world_center;
-
+	
 	double detector_size;
 	double detector_gap;
 	double gap_of_abso_and_scat;
 	int detid_max_of_scatterer;
 	
 	G4ThreeVector detector_center;
-	G4ThreeVector detector_normal;
+	//G4ThreeVector detector_normal;
+	G4ThreeVector detector_rotation;
 
 	bool is_enabled_merge_same_pixel;
 	bool is_enabled_merge_adjacent_pixel;

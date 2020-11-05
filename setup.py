@@ -60,9 +60,9 @@ class CMakeBuild(build_ext):
 
 setup(
     name='sim4py',
-    version='1.0.6',
+    version='1.1.0',
     author='Goro Yabu',
-    author_email='goto.yabu@ipmu.jp',
+    author_email='goro.yabu@ipmu.jp',
     description='Monte-Carlo Simulator of Double-sided strip detector',
     long_description='',
     ext_modules=[CMakeExtension('sim4py')],

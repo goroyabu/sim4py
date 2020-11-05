@@ -7,8 +7,6 @@ import sim4py.general as general # 汎用的なクラスがあるサブモジュ
 import sim4py.CLHEP   as CLHEP   # 単位や乱数エンジン
 import sim4py.wstrip  as wstrip  # 両面ストリップ用のサブモジュール
 
-import user_geometry1 as ug
-
 def usage():
 
     parser = argparse.ArgumentParser( description='Monte-Carlo simulator of e-track on Si',\
@@ -62,8 +60,8 @@ def define_detector(args):
 
     for i in range(8) :
         dsd.AddDetectorLayer( 'CdTe', 750*CLHEP.um )
-        x = math.cos( math.radians(i*45.0) ) * 50
-        y = math.sin( math.radians(i*45.0) ) * 50
+        x = math.cos( math.radians(i*45.0) ) * 100
+        y = math.sin( math.radians(i*45.0) ) * 100
         dsd.SetCurrentLayerPosition( x, y, 0.0, CLHEP.mm )
         dsd.SetCurrentLayerRotation( 0.0, 90.0, i*45.0, CLHEP.deg )
 
@@ -80,30 +78,15 @@ def define_detector(args):
     if args.board_material!='None' :
         dsd.SwitchFlag( 'use_detector_board', True )\
             .SetParameter( 'board_material', args.board_material )\
+            .SetParameter( 'board_thickness', 1.0, CLHEP.mm )\
             .SetParameter( 'board_size', 52, CLHEP.mm )
 
     dsd.ShowParameters()
-
-    # box = wstrip.W4AirContainBox.Instance()\
-    #     .SetParameter( 'box_material', 'Aluminum' )\
-    #     .SetParameter( 'box_center', 0, 0, 119, CLHEP.mm)\
-    #     .SetParameter( 'box_length_x',    310,  CLHEP.mm )\
-    #     .SetParameter( 'box_length_y',    200,  CLHEP.mm )\
-    #     .SetParameter( 'box_length_z',    190,  CLHEP.mm )\
-    #     .SetParameter( 'box_thickness_x', 1,    CLHEP.mm )\
-    #     .SetParameter( 'box_thickness_y', 6,    CLHEP.mm )\
-    #     .SetParameter( 'box_thickness_z', 1,    CLHEP.mm )
-    # box.ShowParameters()
-
-    user_volume = ug.UserVolume.Instance()
-    user_volume.ShowParameters()
 
     detector_construction = general.detector.P4DetectorConstruction.Instance()\
         .SetParameter( 'world_size', 50, CLHEP.cm )
 
     detector_construction.AddVolume( dsd )
-    detector_construction.AddVolume( user_volume )
-    # detector_construction.AddVolume( box )
 
     detector_construction.ShowParameters()
 
@@ -115,9 +98,9 @@ def define_action( file_name, args ):
 
     gps.SetParameter( 'verbose_level', args.verbose )\
         .SetParameter( 'direction', 0.0, 0.0, 1.0 )\
-        .SetParameter( 'pos_centre', 0.0, 0.0, -100.0, CLHEP.mm )\
+        .SetParameter( 'pos_centre', 0.0, 0.0, 0.0, CLHEP.mm )\
         .SetParameter( 'ang_type', 'iso' )\
-        .SetParameter( 'ang_mintheta', 150.0, CLHEP.deg )\
+        .SetParameter( 'ang_mintheta', 0.0, CLHEP.deg )\
         .SetParameter( 'ang_maxtheta', 180.0, CLHEP.deg )\
         .SetParameter( 'particle', 'gamma')
 

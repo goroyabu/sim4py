@@ -80,7 +80,10 @@ namespace wstrip_py
 	    ( sub, "W4DoublesidedStripDetector", pybind11::module_local() )
 	    .def("AddDetectorLayer", pybind11::overload_cast<const std::string&, double>(&W4DoublesidedStripDetector::AddDetectorLayer) )
 	    .def("SetCurrentLayerSize", &W4DoublesidedStripDetector::SetCurrentLayerSize)
-	    .def("SetCurrentLayerPixels", &W4DoublesidedStripDetector::SetCurrentLayerPixels);
+	    .def("SetCurrentLayerPixels", &W4DoublesidedStripDetector::SetCurrentLayerPixels)
+	    .def("SetCurrentLayerPosition", &W4DoublesidedStripDetector::SetCurrentLayerPosition)
+	    .def("SetCurrentLayerRotation", &W4DoublesidedStripDetector::SetCurrentLayerRotation);
+	    //.def("SetCurrentLayerNormal", &W4DoublesidedStripDetector::SetCurrentLayerNormal);
 	sim4py::define_common_method( dsd );
 	sim4py::define_as_singleton( dsd );
 
