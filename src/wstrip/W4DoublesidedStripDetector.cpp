@@ -168,7 +168,12 @@ void W4DoublesidedStripDetector::Construct
 	    }
 	    else
 		cout << "  Without Board" << endl;
-	    
+
+	    auto pos = layer.position;
+	    auto rot = layer.rotation;
+	    cout << "  Position : " << pos.x() << ", " << pos.y() << ", " << pos.z() << endl;
+	    cout << "  Rotation : " << rot.x() << ", " << rot.y() << ", " << rot.z() << endl;
+ 	    
 	    cout << endl;
 	}
 	
@@ -237,11 +242,29 @@ void W4DoublesidedStripDetector::Construct
 	// sd->SetGridXaxis( npixels_xside, pos.x()-size_det, pos.x()+size_det );
 	// sd->SetGridYaxis( npixels_yside, pos.y()-size_det, pos.y()+size_det );
 	// sd->SetGridZaxis(   1, pos.z()-thick,    pos.z()+thick    );
-	sd->SetGridXaxis( xpixels,  position.x()-xlength,  position.x()+xlength  );
-	sd->SetGridYaxis( ypixels,  position.y()-ylength,  position.y()+ylength  );
-	sd->SetGridZaxis( zpixels,  position.z()-thick,    position.z()+thick    );
+	// sd->SetGridXaxis( xpixels,  position.x()-xlength,  position.x()+xlength  );
+	// sd->SetGridYaxis( ypixels,  position.y()-ylength,  position.y()+ylength  );
+	// sd->SetGridZaxis( zpixels,  position.z()-thick,    position.z()+thick    );
+	sd->SetGridXaxis( xpixels,  -xlength,  +xlength  );
+	sd->SetGridYaxis( ypixels,  -ylength,  +ylength  );
+	sd->SetGridZaxis( zpixels,  -thick,    +thick    );
+	
+	// G4ThreeVector vertex1( -xlength, -ylength, -thick );
+	// G4ThreeVector vertex2( xlength, ylength, thick );
+	// vertex1.transform( rotation_matrix ) += position;
+	// vertex2.transform( rotation_matrix ) += position;	
+	// sd->SetGridXaxis( xpixels,  vertex1.x(),  vertex2.x()  );
+	// sd->SetGridYaxis( ypixels,  vertex1.y(),  vertex2.y()  );
+	// sd->SetGridZaxis( zpixels,  vertex1.z(),  vertex2.z()  );
+
+	// sd->SetPositionRotation( position, rotation );
+	sd->SetPositionRotation( position, rotation_matrix );
 	sd->SetDetectorID( user_detector_id );
 
+	// cout << "  X-axis : " << vertex1.x() << " to " << vertex2.x() << endl;
+	// cout << "  Y-axis : " << vertex1.y() << " to " << vertex2.y() << endl;
+	// cout << "  Z-axis : " << vertex1.z() << " to " << vertex2.z() << endl;  
+	
 	if ( matename=="Si" )
 	    sd->SetDetectorMaterial(0);
 	else if ( matename=="CdTe" )

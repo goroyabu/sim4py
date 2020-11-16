@@ -117,7 +117,7 @@ def define_action( file_name, args ):
         .SetParameter( 'direction', 0.0, 0.0, 1.0 )\
         .SetParameter( 'pos_centre', 0.0, 0.0, -100.0, CLHEP.mm )\
         .SetParameter( 'ang_type', 'iso' )\
-        .SetParameter( 'ang_mintheta', 150.0, CLHEP.deg )\
+        .SetParameter( 'ang_mintheta', 0.0, CLHEP.deg )\
         .SetParameter( 'ang_maxtheta', 180.0, CLHEP.deg )\
         .SetParameter( 'particle', 'gamma')
 

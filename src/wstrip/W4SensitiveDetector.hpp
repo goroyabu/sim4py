@@ -13,6 +13,9 @@
 #include <tuple>
 
 #include <G4VSensitiveDetector.hh>
+#include <G4ThreeVector.hh>
+#include <G4RotationMatrix.hh>
+
 // #include <TString.h>
 class TObject;
 class TH1D;
@@ -41,7 +44,10 @@ public:
     G4int SetGridXaxis( G4int nbins, G4double min, G4double max );
     G4int SetGridYaxis( G4int nbins, G4double min, G4double max );
     G4int SetGridZaxis( G4int nbins, G4double min, G4double max );
-
+    
+    // G4int SetPositionRotation( const G4ThreeVector&, const G4ThreeVector& );
+    G4int SetPositionRotation( const G4ThreeVector&, const G4RotationMatrix& );
+    
 private:    
 
     std::tuple<G4int, G4int, G4int> GetStripID
@@ -144,6 +150,12 @@ private:
     TH1D * grid_xaxis;
     TH1D * grid_yaxis;
     TH1D * grid_zaxis;
+
+    G4ThreeVector center_position;
+    // G4ThreeVector rotation_vector;
+    // G4ThreeVector inverse_rotation;
+    G4RotationMatrix rotation;
+    G4RotationMatrix inverse_rotation;
 
     G4String GetUniqueObjectName(const G4String& name);
     void DeleteObject(TObject* obj);

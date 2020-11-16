@@ -62,7 +62,13 @@ W4SensitiveDetector::W4SensitiveDetector( G4String name )
     DefineParameter<int>("verbose_level", verbose_level);
     
     is_applied_parameters = false;
-    
+
+    center_position = G4ThreeVector( 0, 0, 0 );
+    // rotation_vector = G4ThreeVector( 0, 0, 0 );
+    // inverse_rotation = -1 * rotation_vector;
+
+    // rotation.set( 0, 0, 0 );
+    // inverse_rotation = rotation.inverse();
 }
 
 W4SensitiveDetector::~W4SensitiveDetector()
@@ -261,12 +267,31 @@ G4int W4SensitiveDetector::SetGridZaxis( G4int nbins, G4double min, G4double max
     return 0;
 }
 
+// G4int W4SensitiveDetector::SetPositionRotation( const G4ThreeVector& pos, const G4ThreeVector& rot)
+G4int W4SensitiveDetector::SetPositionRotation( const G4ThreeVector& pos, const G4RotationMatrix& rot)
+{
+    this->center_position  = pos;
+    // this->rotation_vector  = rot;
+    // this->inverse_rotation = -1 * rot;
+    this->rotation = rot;
+    this->inverse_rotation = rot.inverse();
+    return 0;
+}
+
 std::tuple<G4int, G4int, G4int> W4SensitiveDetector::GetStripID
 ( const G4ThreeVector& pos )
 {
-    auto x = grid_xaxis->FindBin( pos.x() ) - 1;
-    auto y = grid_yaxis->FindBin( pos.y() ) - 1 + grid_xaxis->GetXaxis()->GetNbins();
-    auto z = grid_zaxis->FindBin( pos.z() ) - 1;
+    auto local_pos = pos - this->center_position;
+    local_pos.transform( this->inverse_rotation );
+    // local_pos += this->center_position;
+    // local_pos.rotateX( this->inverse_rotation.getX() );
+    // local_pos.rotateY( this->inverse_rotation.getY() );
+    // local_pos.rotateZ( this->inverse_rotation.getZ() );
+    
+    auto x = grid_xaxis->FindBin( local_pos.x() ) - 1;
+    // auto y = grid_yaxis->FindBin( local_pos.y() ) - 1;
+    auto y = grid_yaxis->FindBin( local_pos.y() ) - 1 + grid_xaxis->GetXaxis()->GetNbins();
+    auto z = grid_zaxis->FindBin( local_pos.z() ) - 1;
     return std::make_tuple(x, y, z);
 }
 
@@ -274,8 +299,17 @@ std::tuple<G4double, G4double, G4double> W4SensitiveDetector::GetCenterOfPixel
 ( G4int strip_x, G4int strip_y, G4int strip_z )
 {
     auto x = grid_xaxis->GetBinCenter( strip_x+1 );
-    auto y = grid_yaxis->GetBinCenter( strip_y+1 );
+    auto y = grid_yaxis->GetBinCenter( strip_y+1-grid_xaxis->GetXaxis()->GetNbins() );
     auto z = grid_zaxis->GetBinCenter( strip_z+1 );
+
+    auto local_pos = G4ThreeVector( x, y, z );
+    local_pos.transform( this->rotation );
+    local_pos += this->center_position;
+
+    x = local_pos.x();
+    y = local_pos.y();
+    z = local_pos.z();
+    
     return std::make_tuple(x, y, z);
 }
 
