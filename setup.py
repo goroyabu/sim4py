@@ -10,7 +10,7 @@ from distutils.version import LooseVersion
 
 
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir='src'):
+    def __init__(self, name, sourcedir='source'):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
@@ -60,10 +60,10 @@ class CMakeBuild(build_ext):
 
 setup(
     name='sim4py',
-    version='1.1.1',
+    version='2.0.0',
     author='Goro Yabu',
     author_email='goro.yabu@ipmu.jp',
-    description='Monte-Carlo Simulator of Double-sided strip detector',
+    description='Monte-Carlo Simulator',
     long_description='',
     ext_modules=[CMakeExtension('sim4py')],
     cmdclass=dict(build_ext=CMakeBuild),

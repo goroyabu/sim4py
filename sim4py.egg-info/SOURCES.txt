@@ -1,0 +1,8 @@
+LICENSE
+README.md
+setup.py
+sim4py.egg-info/PKG-INFO
+sim4py.egg-info/SOURCES.txt
+sim4py.egg-info/dependency_links.txt
+sim4py.egg-info/not-zip-safe
+sim4py.egg-info/top_level.txt
