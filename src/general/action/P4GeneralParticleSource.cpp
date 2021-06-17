@@ -198,6 +198,11 @@ void P4GeneralParticleSource::apply_parameters()
     auto [ angle_maxtheta, umaxt ] = GetParameter<double, unit>("ang_maxtheta");
     single_source->GetAngDist()->SetMaxTheta( angle_maxtheta*umaxt );
 
+    auto [ ang_minphi, uminp ] = GetParameter<double, unit>("ang_minphi");
+    single_source->GetAngDist()->SetMinPhi( ang_minphi*uminp );
+    auto [ ang_maxphi, umaxp ] = GetParameter<double, unit>("ang_maxphi");
+    single_source->GetAngDist()->SetMaxPhi( ang_maxphi*umaxp );
+    
     if ( use_ion==false && use_ionL==false ) {
 	auto [ energy_type ] = GetParameter<std::string>("ene_type");
 	single_source->GetEneDist()->SetEnergyDisType( energy_type.c_str() );

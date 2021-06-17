@@ -97,11 +97,13 @@ def define_action( file_name, args ):
     gps = general.action.P4GeneralParticleSource.Instance()
 
     gps.SetParameter( 'verbose_level', args.verbose )\
-        .SetParameter( 'direction', 0.0, 0.0, 1.0 )\
+        .SetParameter( 'direction', 1.0, 0.0, 0.0 )\
         .SetParameter( 'pos_centre', 0.0, 0.0, 0.0, CLHEP.mm )\
         .SetParameter( 'ang_type', 'iso' )\
-        .SetParameter( 'ang_mintheta', 0.0, CLHEP.deg )\
-        .SetParameter( 'ang_maxtheta', 180.0, CLHEP.deg )\
+        .SetParameter( 'ang_mintheta', 85.0, CLHEP.deg )\
+        .SetParameter( 'ang_maxtheta', 95.0, CLHEP.deg )\
+        .SetParameter( 'ang_minphi', 0.0, CLHEP.deg )\
+        .SetParameter( 'ang_maxphi', 300.0, CLHEP.deg )\
         .SetParameter( 'particle', 'gamma')
 
     if args.source_shape == 'Sphere' :
